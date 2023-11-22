@@ -1,5 +1,6 @@
 # import database module
-
+import database
+import csv
 # define a funcion called initializing
 
 def initializing():
@@ -16,7 +17,7 @@ def initializing():
     # add all these tables to the database
 
 
-# define a funcion called login
+# define a function called login
 
 def login():
     pass
