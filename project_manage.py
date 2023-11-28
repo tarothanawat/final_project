@@ -1,13 +1,14 @@
 # import database module
 import database
+from database import read_csv, DB, Table
 import csv
 # define a funcion called initializing
 
 def initializing():
-    pass
+
 
 # here are things to do in this function:
-
+    alldata = DB()
     # create an object to read all csv files that will serve as a persistent state for this program
 
     # create all the corresponding tables for those csv files
@@ -15,17 +16,25 @@ def initializing():
     # see the guide how many tables are needed
 
     # add all these tables to the database
+    persons = read_csv('persons.csv')
+    login = read_csv('login.csv')
+    persons_table = Table("persons", persons)
+    login_table = Table("login", login)
+    alldata.insert(persons_table)
+    alldata.insert(login_table)
 
 
 # define a function called login
 
 def login():
-    pass
 
 # here are things to do in this function:
    # add code that performs a login task
         # ask a user for a username and password
         # returns [ID, role] if valid, otherwise returning None
+    user = input("Enter Your Username: ")
+    password = input("Enter Your password: ")
+    
 
 # define a function called exit
 def exit():

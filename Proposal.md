@@ -1,1 +1,1 @@
-The only thing a want to propose is that I haven't finished anything :D
+The advising faculty will evaluate your project in different categories. If the score in each category passes 60% the project is approved.

@@ -5,6 +5,7 @@ import csv, os, copy
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
+
 persons = []
 with open(os.path.join(__location__, 'persons.csv')) as f:
     rows = csv.DictReader(f)
@@ -13,7 +14,15 @@ with open(os.path.join(__location__, 'persons.csv')) as f:
 print(persons)
 
 # add in code for a Database class
+def read_csv(filename):
+    info = []
+    with open(os.path.join(__location__, filename)) as file:
+        rows = csv.DictReader(file)
+        for r in rows:
+            info.append(dict(r))
+    return info
 
+# def write_csv(filename):
 
 class DB:
     def __init__(self):
