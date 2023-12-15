@@ -17,10 +17,15 @@ def initializing():
     # add all these tables to the database
     persons = read_csv('persons.csv')
     login = read_csv('login.csv')
+    project = read_csv('project.csv')
+
     persons_table = Table("persons", persons)
     login_table = Table("login", login)
+    project_table = Table('project', project)
+
     alldata.insert(persons_table)
     alldata.insert(login_table)
+    alldata.insert(project_table)
 
 
 # define a function called login
@@ -38,13 +43,13 @@ def login():
     find_person = login_table.filter(lambda x: x['username'] == user and x['password'] == password)
     if find_person.table == []:
         return None
-    print(find_person.table)
+    # print(find_person.table)
     return [find_person.table[0]['ID'], find_person.table[0]['role']]
 
 def get_data(ID):
     persons_table = alldata.search('persons')
     user_data = persons_table.filter(lambda x: x['ID'] == ID)
-    print(user_data.table[0])
+    # print(user_data.table[0])
     return user_data.table[0]
 
 class Student:
@@ -62,16 +67,30 @@ class Student:
     def check_inbox(self):
         print("inbox test")
 
+    def create_project(self):
+        print("To create a project you will be promoted to be a leader and you must deny all pending invites.")
+        choice = input("Accept condition? (Y/N): ")
+
+
     def run(self):
         print(self)
-        print("You have permission to do the following:")
-        print("1. Check inbox.")
-        print("2. Create a project.")
-        choice = int(input("Enter your choice: "))
-        if choice == 1:
-            self.check_inbox()
+        while True:
+            print("You have permission to do the following:")
+            print("1. Check inbox.")
+            print("2. Create a project.")
+            print("3. Save changes and logout.")
+            choice = int(input("Enter your choice: "))
+            if choice == 1:
+                self.check_inbox()
+            elif choice == 2:
+                self.create_project()
+            elif choice == 3:
+                break
+        #update all tables call function exit()
 
-
+class Project:
+    def __init__(self):
+        pass
 
 
 
