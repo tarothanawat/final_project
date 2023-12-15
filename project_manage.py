@@ -8,7 +8,6 @@ def initializing():
 
 
 # here are things to do in this function:
-    alldata = DB()
     # create an object to read all csv files that will serve as a persistent state for this program
 
     # create all the corresponding tables for those csv files
@@ -33,8 +32,14 @@ def login():
         # ask a user for a username and password
         # returns [ID, role] if valid, otherwise returning None
     user = input("Enter Your Username: ")
-    password = input("Enter Your password: ")
-    
+    password = input("Enter your password: ")
+    login_table = alldata.search('login')
+    find_person = login_table.filter(lambda x: x['username'] == user and x['password'] == password)
+    if find_person.table == []:
+        return None
+    print(find_person.table)
+    return [find_person.table[0]['ID'], find_person.table[0]['role']]
+
 
 # define a function called exit
 def exit():
@@ -48,7 +53,7 @@ def exit():
 
 
 # make calls to the initializing and login functions defined above
-
+alldata = DB()
 initializing()
 val = login()
 

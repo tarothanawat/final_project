@@ -11,7 +11,7 @@ with open(os.path.join(__location__, 'persons.csv')) as f:
     rows = csv.DictReader(f)
     for r in rows:
         persons.append(dict(r))
-print(persons)
+
 
 # add in code for a Database class
 def read_csv(filename):
