@@ -36,13 +36,15 @@ def login():
    # add code that performs a login task
         # ask a user for a username and password
         # returns [ID, role] if valid, otherwise returning None
-    login_table = alldata.search('login')
-    user = input("Enter Your Username: ")
-    password = input("Enter your password: ")
+    while True:
+        login_table = alldata.search('login')
+        user = input("Enter Your Username: ")
+        password = input("Enter your password: ")
 
-    find_person = login_table.filter(lambda x: x['username'] == user and x['password'] == password)
-    if find_person.table == []:
-        return None
+        find_person = login_table.filter(lambda x: x['username'] == user and x['password'] == password)
+        if find_person.table != []:
+            break
+        print("Your Username or password is incorrect! Try again.")
     # print(find_person.table)
     return [find_person.table[0]['ID'], find_person.table[0]['role']]
 
@@ -74,6 +76,7 @@ class Student:
 
     def run(self):
         print(self)
+        print()
         while True:
             print("You have permission to do the following:")
             print("1. Check inbox.")
@@ -86,6 +89,7 @@ class Student:
                 self.create_project()
             elif choice == 3:
                 break
+            print()
         #update all tables call function exit()
 
 class Project:
