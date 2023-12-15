@@ -41,9 +41,41 @@ def login():
     print(find_person.table)
     return [find_person.table[0]['ID'], find_person.table[0]['role']]
 
+def get_data(ID):
+    persons_table = alldata.search('persons')
+    user_data = persons_table.filter(lambda x: x['ID'] == ID)
+    print(user_data.table[0])
+    return user_data.table[0]
+
 class Student:
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, data):
+        self.id = data['ID']
+        self.first = data['first']
+        self.last = data['last']
+        self.type = data['type']
+        self.requests = []
+        self.run()
+
+    def __str__(self):
+        return (f"You logged in as {self.first} {self.last}. \n"
+                f"You are a {self.type}.")
+    def check_inbox(self):
+        print("inbox test")
+
+    def run(self):
+        print(self)
+        print("You have permission to do the following:")
+        print("1. Check inbox.")
+        print("2. Create a project.")
+        choice = int(input("Enter your choice: "))
+        if choice == 1:
+            self.check_inbox()
+
+
+
+
+
+
 
 
 # define a function called exit
@@ -61,27 +93,29 @@ def exit():
 alldata = DB()
 initializing()
 val = login()
+user_data = get_data(val[0])
+
 
 # based on the return value for login, activate the code that performs activities according to the role defined for that person_id
-while True:
-    if val[1] == 'admin':
-        #see and do admin related activities
-        pass
-    elif val[1] == 'student':
-        #see and do student related activities
-        pass
-    elif val[1] == 'member':
-        #see and do member related activities
-        pass
-    elif val[1] == 'lead':
-        #see and do lead related activities
-        pass
-    elif val[1] == 'faculty':
-        #see and do faculty related activities
-        pass
-    elif val[1] == 'advisor':
-        #see and do advisor related activities
-        pass
+
+if val[1] == 'admin':
+    #see and do admin related activities
+    pass
+elif val[1] == 'student':
+    #see and do student related activities
+    student1 = Student(user_data)
+elif val[1] == 'member':
+    #see and do member related activities
+    pass
+elif val[1] == 'lead':
+    #see and do lead related activities
+    pass
+elif val[1] == 'faculty':
+    #see and do faculty related activities
+    pass
+elif val[1] == 'advisor':
+    #see and do advisor related activities
+    pass
 
 
 
