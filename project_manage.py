@@ -1,6 +1,6 @@
 # import database module
 import database
-from database import read_csv, DB, Table
+from database import read_csv, DB, Table, write_csv
 import csv
 # define a funcion called initializing
 
@@ -31,14 +31,19 @@ def login():
    # add code that performs a login task
         # ask a user for a username and password
         # returns [ID, role] if valid, otherwise returning None
+    login_table = alldata.search('login')
     user = input("Enter Your Username: ")
     password = input("Enter your password: ")
-    login_table = alldata.search('login')
+
     find_person = login_table.filter(lambda x: x['username'] == user and x['password'] == password)
     if find_person.table == []:
         return None
     print(find_person.table)
     return [find_person.table[0]['ID'], find_person.table[0]['role']]
+
+class Student:
+    def __init__(self, id):
+        self.id = id
 
 
 # define a function called exit
@@ -58,19 +63,27 @@ initializing()
 val = login()
 
 # based on the return value for login, activate the code that performs activities according to the role defined for that person_id
+while True:
+    if val[1] == 'admin':
+        #see and do admin related activities
+        pass
+    elif val[1] == 'student':
+        #see and do student related activities
+        pass
+    elif val[1] == 'member':
+        #see and do member related activities
+        pass
+    elif val[1] == 'lead':
+        #see and do lead related activities
+        pass
+    elif val[1] == 'faculty':
+        #see and do faculty related activities
+        pass
+    elif val[1] == 'advisor':
+        #see and do advisor related activities
+        pass
 
-# if val[1] = 'admin':
-    # see and do admin related activities
-# elif val[1] = 'student':
-    # see and do student related activities
-# elif val[1] = 'member':
-    # see and do member related activities
-# elif val[1] = 'lead':
-    # see and do lead related activities
-# elif val[1] = 'faculty':
-    # see and do faculty related activities
-# elif val[1] = 'advisor':
-    # see and do advisor related activities
+
 
 # once everyhthing is done, make a call to the exit function
 exit()

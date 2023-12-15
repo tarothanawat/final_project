@@ -33,4 +33,8 @@ What should be displayed when we login as each roles?
     - Send out requests to a potential advisor; can only do one at a time and after all potential members have accepted or denied the requests
         - Advisor_pending_request table needs to be updated
     
-  -
+[database.py]
+    - needs write csv function.
+
+[project_manage.py]
+    - need to implement a way to update data in csv files to table classes.

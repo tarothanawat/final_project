@@ -22,7 +22,13 @@ def read_csv(filename):
             info.append(dict(r))
     return info
 
-# def write_csv(filename):
+def write_csv(filename, data):
+    with open(os.path.join(__location__, filename), mode='w', newline='') as file:
+        fieldnames = data[0].keys
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(data)
+
 
 class DB:
     def __init__(self):
