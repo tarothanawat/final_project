@@ -54,6 +54,13 @@ def login():
     # print(find_person.table)
     return [find_person.table[0]['ID'], find_person.table[0]['role']]
 
+def change_role(ID, role):
+    persons_table = alldata.search('persons')
+    persons_table.update_row('ID', ID, 'type', role)
+
+    login_table = alldata.search('login')
+    login_table.update_row('ID', ID, 'role', role)
+
 def get_data(ID):
     persons_table = alldata.search('persons')
     user_data = persons_table.filter(lambda x: x['ID'] == ID)
@@ -77,14 +84,14 @@ class Student:
     def update_table(self, table_name, data):
         my_table = alldata.search(table_name)
         my_table.insert_row(data)
-        print(my_table)
 
     def check_inbox(self):
         print("inbox test")
 
     def create_project(self):
         project_table = alldata.search('project')
-        project_id = project_table.filter(lambda x: x['ProjectID'])
+        project_id = project_table.aggregate(lambda x: str(x), 'ProjectID')
+        print(project_id)
         print("To create a project you will be promoted to be a leader and you must deny all pending invites.")
         choice = input("Accept condition? (Y/N): ")
         if choice.lower() == 'n':
@@ -92,16 +99,16 @@ class Student:
             return None
         if choice.lower() == 'y':
             while True:
-                id_input = str(input("Enter your project ID. (ID must be 5 digits): "))
-                if len(id_input) == 5 and id_input not in project_id.table:
+                id_input = str(input("Create your project ID. (ID must be 5 digits): "))
+                if len(id_input) == 5 and id_input not in project_id:
                     break
-                print("Your ID must contains 4 digits! Try again.")
+                print("Your ID must contains 4 digits and must not been taken. Try again.")
                 print()
+
             title = input("Enter your project Title: ")
             self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
             self.update_table('project', self.project_data)
-            print(self.project_data)
-
+            change_role(self.id, 'leader')
             print("Project has been initialized, Please re-login.")
             return 1
 
@@ -126,50 +133,42 @@ class Student:
         #update all tables call function exit()
 
 
+class Leader:
+    def __init__(self):
+        pass
+
+
 class Project:
     def __init__(self):
         pass
 
 
-
 # define a function called exit
 def exit():
     print("You have logged out.")
-    login_table = alldata.search('login')
-    persons_table = alldata.search('persons')
-    project_table = alldata.search('project')
-    advisor_pending_table = alldata.search('advisor_pending_request')
-    member_pending_table = alldata.search('member_pending_request')
+    tables = {
+        'login': 'login.csv',
+        'persons': 'persons.csv',
+        'project': 'project.csv',
+        'advisor_pending_request': 'advisor_pending_request.csv',
+        'member_pending_request': 'member_pending_request.csv'
+    }
 
-    login_file = open('login.csv', 'w', newline='')
-    login_writer = csv.DictWriter(login_file, fieldnames=login_table.table[0].keys())
-    login_writer.writeheader()
-    login_writer.writerows(login_table.table)
-    login_file.close()
+    field_names = {
+        'login': ['ID', 'username', 'password', 'role'],
+        'persons': ['ID', 'first', 'last', 'type'],
+        'project': ['ProjectID', "Title", "Lead", 'Member1', 'Member2', 'Advisor', 'Status'],
+        'advisor_pending_request': ['ProjectID', 'to_be_advisor', 'Response', 'Response_date'],
+        'member_pending_request': ['ProjectID', 'to_be_member', 'Response', 'Response_date']
+    }
 
-    persons_file = open('persons.csv', 'w', newline='')
-    persons_writer = csv.DictWriter(persons_file, fieldnames=persons_table.table[0].keys())
-    persons_writer.writeheader()
-    persons_writer.writerows(persons_table.table)
-    persons_file.close()
-
-    project_file = open('project.csv', 'w', newline='')
-    project_writer = csv.DictWriter(project_file, fieldnames=['ProjectID', "Title", "Lead", 'Member1', 'Member2', 'Advisor', 'Status'])
-    project_writer.writeheader()
-    project_writer.writerows(project_table.table)
-    project_file.close()
-
-    advisor_file = open('advisor_pending_request.csv', 'w', newline='')
-    advisor_writer = csv.DictWriter(advisor_file, fieldnames=['ProjectID','to_be_advisor','Response','Response_date'])
-    advisor_writer.writeheader()
-    advisor_writer.writerows(advisor_pending_table.table)
-    advisor_file.close()
-
-    member_file = open('member_pending_request.csv', 'w', newline="")
-    member_writer = csv.DictWriter(member_file, fieldnames=['ProjectID', 'to_be_member', 'Response', 'Response_date'])
-    member_writer.writeheader()
-    member_writer.writerows(member_pending_table.table)
-    member_file.close()
+    for table_name, file_name in tables.items():
+        table = alldata.search(table_name)
+        file = open(file_name, 'w', newline='')
+        writer = csv.DictWriter(file, fieldnames=field_names[table_name])
+        writer.writeheader()
+        writer.writerows(table.table)
+        file.close()
 
 # here are things to do in this function:
    # write out all the tables that have been modified to the corresponding csv files
