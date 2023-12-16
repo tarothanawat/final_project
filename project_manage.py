@@ -86,6 +86,9 @@ class Student:
         self.first = data['first']
         self.last = data['last']
         self.type = data['type']
+
+        # print(self.project_id)
+        self.pending_request = {}
         self.project_data = {}
         self.run()
 
@@ -98,12 +101,14 @@ class Student:
         my_table.insert_row(data)
 
     def check_inbox(self):
-        print("inbox test")
+        pending_req_table = alldata.search('member_pending_request')
+        find_req = pending_req_table.filter(lambda x: x['to_be_member'] == self.id)
+
 
     def create_project(self):
         project_table = alldata.search('project')
         project_id = project_table.aggregate(lambda x: str(x), 'ProjectID')
-        print(project_id)
+        # print(project_id)
         print("To create a project you will be promoted to be a leader and you must deny all pending invites.")
         choice = input("Accept condition? (Y/N): ")
         if choice.lower() == 'n':
@@ -170,7 +175,17 @@ class Leader:
         pass
 
     def check_inbox(self):
-        pass
+        member_pending_table = alldata.search('member_pending_request')
+        find_project_req = member_pending_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        print(f"You have sent out {len(find_project_req.table)} invite(s).")
+        for i in find_project_req.table:
+            data = get_data(i['to_be_member'])
+            first = data['first']
+            last = data['last']
+            print(f"You invited {i['to_be_member']} {first} {last}.")
+            print(f"Their response: {i['Response']} date: {i['Response_date']}")
+            print()
+
 
     def invite_members(self):
         request_data = {}
