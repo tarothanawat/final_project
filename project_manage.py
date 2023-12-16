@@ -67,7 +67,7 @@ class Student:
         self.first = data['first']
         self.last = data['last']
         self.type = data['type']
-        self.project_data = []
+        self.project_data = {}
         self.run()
 
     def __str__(self):
@@ -83,7 +83,6 @@ class Student:
         print("inbox test")
 
     def create_project(self):
-        project_data = []
         print("To create a project you will be promoted to be a leader and you must deny all pending invites.")
         choice = input("Accept condition? (Y/N): ")
         if choice.lower() == 'n':
@@ -97,7 +96,7 @@ class Student:
                 print("Your ID must contains 4 digits! Try again.")
                 print()
             title = input("Enter your project Title.")
-            self.project_data.append({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
+            self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
             self.update_table('project', self.project_data)
             print(self.project_data)
 
@@ -114,14 +113,16 @@ class Student:
             print("3. Logout.")
             choice = int(input("Enter your choice: "))
             if choice == 1:
+                print()
                 self.check_inbox()
             elif choice == 2:
+                print()
                 self.create_project()
             elif choice == 3:
                 break
             print()
         #update all tables call function exit()
-        exit()
+
 
 class Project:
     def __init__(self):
@@ -131,6 +132,7 @@ class Project:
 
 # define a function called exit
 def exit():
+    print("You have logged out.")
     login_table = alldata.search('login')
     persons_table = alldata.search('persons')
     project_table = alldata.search('project')
