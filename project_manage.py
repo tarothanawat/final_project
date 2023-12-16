@@ -83,6 +83,8 @@ class Student:
         print("inbox test")
 
     def create_project(self):
+        project_table = alldata.search('project')
+        project_id = project_table.filter(lambda x: x['ProjectID'])
         print("To create a project you will be promoted to be a leader and you must deny all pending invites.")
         choice = input("Accept condition? (Y/N): ")
         if choice.lower() == 'n':
@@ -90,12 +92,12 @@ class Student:
             return None
         if choice.lower() == 'y':
             while True:
-                id_input = str(input("Enter your project ID. (ID must be 4 digits.)"))
-                if len(id_input) == 4:
+                id_input = str(input("Enter your project ID. (ID must be 5 digits): "))
+                if len(id_input) == 5 and id_input not in project_id.table:
                     break
                 print("Your ID must contains 4 digits! Try again.")
                 print()
-            title = input("Enter your project Title.")
+            title = input("Enter your project Title: ")
             self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
             self.update_table('project', self.project_data)
             print(self.project_data)
