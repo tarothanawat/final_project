@@ -134,8 +134,54 @@ class Student:
 
 
 class Leader:
-    def __init__(self):
+    def __init__(self, data):
+        self.data = data
+        self.id = data['ID']
+        self.first = data['first']
+        self.last = data['last']
+        self.type = data['type']
+        self.project_data = {}
+        self.run()
+
+    def __str__(self):
+        return (f"You logged in as {self.first} {self.last}. \n"
+                f"You are a {self.type}.")
+
+    def project_status(self):
         pass
+
+    def modify_project(self):
+        pass
+
+    def check_inbox(self):
+        pass
+
+    def invite_members(self):
+        pass
+
+    def request_prof(self):
+        pass
+    def run(self):
+        print(self)
+        print()
+        while True:
+            print("You have permission to do the following:")
+            print("1. See project status.")
+            print("2. See and modify project info.")
+            print("3. Check inbox.")
+            print("4. Invite members.")
+            print("4. Send request to a professor.")
+            choice = int(input("Enter your choice: "))
+            if choice == 1:
+                print()
+                self.project_status()
+            elif choice == 2:
+                print()
+                self.create_project()
+            elif choice == 3:
+                break
+            print()
+
 
 
 class Project:
@@ -196,7 +242,7 @@ elif val[1] == 'member':
     #see and do member related activities
     pass
 elif val[1] == 'lead':
-    #see and do lead related activities
+    leader1 = Leader(user_data)
     pass
 elif val[1] == 'faculty':
     #see and do faculty related activities
