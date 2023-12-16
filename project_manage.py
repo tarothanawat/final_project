@@ -18,14 +18,20 @@ def initializing():
     persons = read_csv('persons.csv')
     login = read_csv('login.csv')
     project = read_csv('project.csv')
+    advisor_pending = read_csv('advisor_pending_request.csv')
+    member_pending = read_csv('member_pending_request.csv')
 
     persons_table = Table("persons", persons)
     login_table = Table("login", login)
     project_table = Table('project', project)
+    advisor_pending_table = Table('advisor_pending_request', advisor_pending)
+    member_pending_table = Table('member_pending_request', member_pending)
 
     alldata.insert(persons_table)
     alldata.insert(login_table)
     alldata.insert(project_table)
+    alldata.insert(advisor_pending_table)
+    alldata.insert(member_pending_table)
 
 
 # define a function called login
@@ -68,6 +74,11 @@ class Student:
         return (f"You logged in as {self.first} {self.last}. \n"
                 f"You are a {self.type}.")
 
+    def update_table(self, table_name, data):
+        my_table = alldata.search(table_name)
+        my_table.insert_row(data)
+        print(my_table)
+
     def check_inbox(self):
         print("inbox test")
 
@@ -87,6 +98,9 @@ class Student:
                 print()
             title = input("Enter your project Title.")
             self.project_data.append({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
+            self.update_table('project', self.project_data)
+            print(self.project_data)
+
             print("Project has been initialized, Please re-login.")
             return 1
 
@@ -102,12 +116,12 @@ class Student:
             if choice == 1:
                 self.check_inbox()
             elif choice == 2:
-                project_confirm = self.create_project()
-                write_csv('project.csv', self.project_data)
+                self.create_project()
             elif choice == 3:
                 break
             print()
         #update all tables call function exit()
+        exit()
 
 class Project:
     def __init__(self):
@@ -117,7 +131,41 @@ class Project:
 
 # define a function called exit
 def exit():
-    pass
+    login_table = alldata.search('login')
+    persons_table = alldata.search('persons')
+    project_table = alldata.search('project')
+    advisor_pending_table = alldata.search('advisor_pending_request')
+    member_pending_table = alldata.search('member_pending_request')
+
+    login_file = open('login.csv', 'w', newline='')
+    login_writer = csv.DictWriter(login_file, fieldnames=login_table.table[0].keys())
+    login_writer.writeheader()
+    login_writer.writerows(login_table.table)
+    login_file.close()
+
+    persons_file = open('persons.csv', 'w', newline='')
+    persons_writer = csv.DictWriter(persons_file, fieldnames=persons_table.table[0].keys())
+    persons_writer.writeheader()
+    persons_writer.writerows(persons_table.table)
+    persons_file.close()
+
+    project_file = open('project.csv', 'w', newline='')
+    project_writer = csv.DictWriter(project_file, fieldnames=['ProjectID', "Title", "Lead", 'Member1', 'Member2', 'Advisor', 'Status'])
+    project_writer.writeheader()
+    project_writer.writerows(project_table.table)
+    project_file.close()
+
+    advisor_file = open('advisor_pending_request.csv', 'w', newline='')
+    advisor_writer = csv.DictWriter(advisor_file, fieldnames=['ProjectID','to_be_advisor','Response','Response_date'])
+    advisor_writer.writeheader()
+    advisor_writer.writerows(advisor_pending_table.table)
+    advisor_file.close()
+
+    member_file = open('member_pending_request.csv', 'w', newline="")
+    member_writer = csv.DictWriter(member_file, fieldnames=['ProjectID', 'to_be_member', 'Response', 'Response_date'])
+    member_writer.writeheader()
+    member_writer.writerows(member_pending_table.table)
+    member_file.close()
 
 # here are things to do in this function:
    # write out all the tables that have been modified to the corresponding csv files
