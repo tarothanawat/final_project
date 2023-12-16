@@ -26,7 +26,7 @@ def write_csv(filename, data):
     with open(os.path.join(__location__, filename), mode='w', newline='') as file:
         fieldnames = data[0].keys
         writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
+        # writer.writeheader()
         writer.writerows(data)
 
 
@@ -97,6 +97,15 @@ class Table:
                     dict_temp[key] = item1[key]
             temps.append(dict_temp)
         return temps
+
+    def insert_row(self, dict):
+        self.table.append(dict)
+
+    def update_row(self, primary_attribute, primary_attribute_value, update_attribute, update_value):
+        for i in self.table:
+            if i[primary_attribute] == primary_attribute_value:
+                i[update_attribute] = update_value
+
 
     def pivot_table(self, keys_to_pivot_list, keys_to_aggreagte_list, aggregate_func_list):
 

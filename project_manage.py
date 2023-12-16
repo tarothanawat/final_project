@@ -56,23 +56,39 @@ def get_data(ID):
 
 class Student:
     def __init__(self, data):
+        self.data = data
         self.id = data['ID']
         self.first = data['first']
         self.last = data['last']
         self.type = data['type']
-        self.requests = []
+        self.project_data = []
         self.run()
 
     def __str__(self):
         return (f"You logged in as {self.first} {self.last}. \n"
                 f"You are a {self.type}.")
+
     def check_inbox(self):
         print("inbox test")
 
     def create_project(self):
+        project_data = []
         print("To create a project you will be promoted to be a leader and you must deny all pending invites.")
         choice = input("Accept condition? (Y/N): ")
-
+        if choice.lower() == 'n':
+            print("Project creation progress has been canceled. Returning to menu.")
+            return None
+        if choice.lower() == 'y':
+            while True:
+                id_input = str(input("Enter your project ID. (ID must be 4 digits.)"))
+                if len(id_input) == 4:
+                    break
+                print("Your ID must contains 4 digits! Try again.")
+                print()
+            title = input("Enter your project Title.")
+            self.project_data.append({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
+            print("Project has been initialized, Please re-login.")
+            return 1
 
     def run(self):
         print(self)
@@ -81,12 +97,13 @@ class Student:
             print("You have permission to do the following:")
             print("1. Check inbox.")
             print("2. Create a project.")
-            print("3. Save changes and logout.")
+            print("3. Logout.")
             choice = int(input("Enter your choice: "))
             if choice == 1:
                 self.check_inbox()
             elif choice == 2:
-                self.create_project()
+                project_confirm = self.create_project()
+                write_csv('project.csv', self.project_data)
             elif choice == 3:
                 break
             print()
@@ -95,9 +112,6 @@ class Student:
 class Project:
     def __init__(self):
         pass
-
-
-
 
 
 
