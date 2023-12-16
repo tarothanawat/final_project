@@ -67,6 +67,18 @@ def get_data(ID):
     # print(user_data.table[0])
     return user_data.table[0]
 
+def get_role(ID):
+    persons_table = alldata.search('persons')
+    type = persons_table.filter(lambda x: x['ID'] == ID).aggregate(lambda x: x, 'type')
+    print(type)
+    return type
+
+def get_project(leader_id):
+    project_table = alldata.search('project')
+    find_project = project_table.filter(lambda x: x['Lead'] == leader_id)
+    # print(find_project.table[0])
+    return find_project.table[0]
+
 class Student:
     def __init__(self, data):
         self.data = data
@@ -108,7 +120,7 @@ class Student:
             title = input("Enter your project Title: ")
             self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
             self.update_table('project', self.project_data)
-            change_role(self.id, 'leader')
+            change_role(self.id, 'lead')
             print("Project has been initialized, Please re-login.")
             return 1
 
@@ -140,7 +152,11 @@ class Leader:
         self.first = data['first']
         self.last = data['last']
         self.type = data['type']
-        self.project_data = {}
+
+        self.project_data = get_project(self.id)
+        self.project_id = self.project_data['ProjectID']
+        # print(self.project_id)
+        self.pending_request = {}
         self.run()
 
     def __str__(self):
@@ -157,10 +173,30 @@ class Leader:
         pass
 
     def invite_members(self):
-        pass
+        request_data = {}
+        member_pending_table = alldata.search('member_pending_request')
+        persons_table = alldata.search('persons')
+        available_students = persons_table.filter(lambda x: x['type'] == 'student')
+        while True:
+            print("Here is the list of available students.")
+            print(available_students.table)
+            id_member = str(input("Please Enter the ID of your potential member: "))
+            member_data = get_data(id_member)
+            print(f"You're about to invite {member_data['first']} {member_data['last']} as a member of your team.")
+            confirm = str(input("Do you wish to confirm? (Y/N): "))
+            if confirm.lower() == 'y':
+                request_data.update({'ProjectID': self.project_id, 'to_be_member': id_member, 'Response': 'HasNotRespond', 'Response_date': 'HasNotRespond'})
+                member_pending_table.insert_row(request_data)
+                print(f"Invite Has been sent to {member_data['first']} {member_data['last']}. Please re-login to see changes.")
+                break
+            elif confirm.lower() == 'n':
+                continue
+
+
 
     def request_prof(self):
         pass
+
     def run(self):
         print(self)
         print()
@@ -170,15 +206,25 @@ class Leader:
             print("2. See and modify project info.")
             print("3. Check inbox.")
             print("4. Invite members.")
-            print("4. Send request to a professor.")
+            print("5. Send request to a professor.")
+            print("6. Logout")
             choice = int(input("Enter your choice: "))
             if choice == 1:
                 print()
                 self.project_status()
             elif choice == 2:
                 print()
-                self.create_project()
+                self.modify_project()
             elif choice == 3:
+                print()
+                self.check_inbox()
+            elif choice == 4:
+                print()
+                self.invite_members()
+            elif choice == 5:
+                print()
+                self.request_prof()
+            elif choice == 6:
                 break
             print()
 
@@ -228,6 +274,7 @@ alldata = DB()
 initializing()
 val = login()
 user_data = get_data(val[0])
+
 
 
 # based on the return value for login, activate the code that performs activities according to the role defined for that person_id
