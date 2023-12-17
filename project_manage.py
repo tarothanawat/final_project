@@ -165,8 +165,9 @@ class Student:
             self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
             self.update_table('project', self.project_data)
             change_role(self.id, 'lead')
-            print("Project has been initialized, Please re-login.")
+            print("Project has been initialized, returning to menu...")
             return 1
+        exit()
 
     def run(self):
         print(self)
@@ -216,50 +217,98 @@ class Leader:
 
     def check_inbox(self):
         member_pending_table = alldata.search('member_pending_request')
-        find_project_req = member_pending_table.filter(lambda x: x['ProjectID'] == self.project_id)
-        print(f"You have sent out {len(find_project_req.table)} invite(s).")
-        for i in find_project_req.table:
-            data = get_data(i['to_be_member'])
+
+        print("Which message do you want to see?")
+        print("1. See invites to potential group member(s).")
+        print("2. See request to potential advisor.")
+        choose = str(input("Enter your choice: "))
+        if choose == "1":
+            find_project_req = member_pending_table.filter(lambda x: x['ProjectID'] == self.project_id)
+            print(f"You have sent out {len(find_project_req.table)} invite(s).")
+            for i in find_project_req.table:
+                data = get_data(i['to_be_member'])
+                first = data['first']
+                last = data['last']
+                print(f"You invited {i['to_be_member']} {first} {last}.")
+                print(f"Their response: {i['Response']} , date: {i['Response_date']}")
+                print()
+            print(f"Choose a student to be member of your project group.")
+            while True:
+                member_id = str(input("Enter their ID: "))
+                find_mem_req = find_project_req.filter(lambda x: x['to_be_member'] == member_id)
+                if find_mem_req.table[0]['Response'] != 'Accepted':
+                    print("Invalid ID(the student didn't accept your invitation or is already in a group). Please try again.")
+                    continue
+
+                if find_mem_req != []:
+                    break
+                print("Invalid ID. Please try again.")
+            data = get_data(member_id)
             first = data['first']
             last = data['last']
-            print(f"You invited {i['to_be_member']} {first} {last}.")
-            print(f"Their response: {i['Response']} , date: {i['Response_date']}")
-            print()
-        print(f"Choose a student to be member of your project group.")
-        while True:
-            member_id = str(input("Enter their ID: "))
-            find_mem_req = find_project_req.filter(lambda x: x['to_be_member'] == member_id)
-            if find_mem_req.table[0]['Response'] != 'Accepted':
-                print("Invalid ID(the student didn't accept your invitation or is already in a group). Please try again.")
-                continue
+            project_table = alldata.search('project')
+            find_project = project_table.filter(lambda x: x['ProjectID'] == self.project_id)
+            print(f"You're about to add {first} {last} to your group.")
+            confirm = str(input("Do you wish to confirm? (Y/N): "))
+            if confirm.lower() == 'y':
+                if find_project.table[0]['Member1'] == '':
+                    find_project.update_row('ProjectID', self.project_id, 'Member1', member_id)
+                    change_role(member_id, 'member')
+                    # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
+                    find_project_req.update_row('to_be_member', member_id, 'Response', 'JoinedGroup')
+                    print(f"{first} {last} has been added to your group as Member1. Returning to menu...")
+                elif find_project.table[0]['Member2'] == '':
+                    find_project.update_row('ProjectID', self.project_id, 'Member2', member_id)
+                    change_role(member_id, 'member')
+                    # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
+                    find_project_req.update_row('to_be_member', member_id, 'Response', 'JoinedGroup')
+                    print(f"{first} {last} has been added to your group as Member2. Returning to menu...")
+                else:
+                    print("Your group exceeds the limit of 2 members, you can't add more. Returning to menu...")
+            if confirm.lower() == 'n':
+                print("Member adding process cancelled. Returning to menu...")
+        ##############################################################################
+        if choose == '2':
+            advisor_pending_table = alldata.search('advisor_pending_request')
+            find_project_req = advisor_pending_table.filter(lambda x: x['ProjectID'] == self.project_id)
+            print(f"You have sent out {len(find_project_req.table)} request(s).")
+            for i in find_project_req.table:
+                data = get_data(i['to_be_advisor'])
+                first = data['first']
+                last = data['last']
+                print(f"You invited {i['to_be_advisor']} {first} {last}.")
+                print(f"Their response: {i['Response']} , date: {i['Response_date']}")
+                print()
+            print(f"Choose a Professor to be advisor of your project.")
+            while True:
+                prof_id = str(input("Enter their ID: "))
+                find_prof_req = find_project_req.filter(lambda x: x['to_be_advisor'] == prof_id)
+                if find_prof_req.table[0]['Response'] != 'Accepted':
+                    print(
+                        "Invalid ID(the professor didn't accept your request or is already an advisor of a group). Please try again.")
+                    continue
 
-            if find_mem_req != []:
-                break
-            print("Invalid ID. Please try again.")
-        data = get_data(member_id)
-        first = data['first']
-        last = data['last']
-        project_table = alldata.search('project')
-        find_project = project_table.filter(lambda x: x['ProjectID'] == self.project_id)
-        print(f"You're about to add {first} {last} to your group.")
-        confirm = str(input("Do you wish to confirm? (Y/N): "))
-        if confirm.lower() == 'y':
-            if find_project.table[0]['Member1'] == '':
-                find_project.update_row('ProjectID', self.project_id, 'Member1', member_id)
-                change_role(member_id, 'member')
-                # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
-                find_project_req.update_row('to_be_member', member_id, 'Response', 'JoinedGroup')
-                print(f"{first} {last} has been added to your group as Member1. Returning to menu...")
-            elif find_project.table[0]['Member2'] == '':
-                find_project.update_row('ProjectID', self.project_id, 'Member2', member_id)
-                change_role(member_id, 'member')
-                # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
-                find_project_req.update_row('to_be_member', member_id, 'Response', 'JoinedGroup')
-                print(f"{first} {last} has been added to your group as Member2. Returning to menu...")
-            else:
-                print("Your group exceeds the limit of 2 members, you can't add more. Returning to menu...")
-        if confirm.lower() == 'n':
-            print("Member adding process cancelled. Returning to menu...")
+                if find_prof_req != []:
+                    break
+                print("Invalid ID. Please try again.")
+            data = get_data(prof_id)
+            first = data['first']
+            last = data['last']
+            project_table = alldata.search('project')
+            find_project = project_table.filter(lambda x: x['ProjectID'] == self.project_id)
+            print(f"You're about to let {first} {last} to be the advisor your group.")
+            confirm = str(input("Do you wish to confirm? (Y/N): "))
+            if confirm.lower() == 'y':
+                if find_project.table[0]['Advisor'] == '':
+                    find_project.update_row('ProjectID', self.project_id, 'Advisor', prof_id)
+                    change_role(prof_id, 'advisor')
+                    # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
+                    find_project_req.update_row('to_be_member', prof_id, 'Response', 'IsAnAdvisor')
+                    print(f"{first} {last} is now your project advisor. Returning to menu...")
+                else:
+                    print("Your group already has an advisor. Returning to menu...")
+            if confirm.lower() == 'n':
+                print("Advisor confirmation process cancelled. Returning to menu...")
         exit()
 
     def invite_members(self):
@@ -277,14 +326,32 @@ class Leader:
             if confirm.lower() == 'y':
                 request_data.update({'ProjectID': self.project_id, 'to_be_member': id_member, 'Response': 'HasNotRespond', 'Response_date': 'HasNotRespond'})
                 member_pending_table.insert_row(request_data)
-                print(f"Invite Has been sent to {member_data['first']} {member_data['last']}. Please re-login to see changes.")
+                print(f"Invite Has been sent to {member_data['first']} {member_data['last']}.")
                 break
             elif confirm.lower() == 'n':
                 continue
-            exit()
+        exit()
 
     def request_prof(self):
-        pass
+        request_data = {}
+        advisor_req_table = alldata.search('advisor_pending_request')
+        persons_table = alldata.search('persons')
+        available_prof = persons_table.filter(lambda x: x['type'] == 'faculty')
+        while True:
+            print("Here is the list of available professors.")
+            print(available_prof.table)
+            id_advisor = str(input("Please Enter the ID of your potential advisor: "))
+            advisor_data = get_data(id_advisor)
+            print(f"You're about to invite {advisor_data['first']} {advisor_data['last']} as a advisor of your project.")
+            confirm = str(input("Do you wish to confirm? (Y/N): "))
+            if confirm.lower() == 'y':
+                request_data.update({'ProjectID': self.project_id, 'to_be_advisor': id_advisor, 'Response': 'HasNotRespond', 'Response_date': 'HasNotRespond'})
+                advisor_req_table.insert_row(request_data)
+                print(f"Invite Has been sent to {advisor_data['first']} {advisor_data['last']}.")
+                break
+            elif confirm.lower() == 'n':
+                continue
+        exit()
 
     def run(self):
         print(self)
@@ -318,7 +385,9 @@ class Leader:
                 break
             print()
 
-
+class Faculty:
+    def __init__(self, data):
+        pass
 class Project:
     def __init__(self):
         pass
