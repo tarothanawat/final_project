@@ -132,7 +132,6 @@ class Student:
             response = str(input("What is your response? (Accept/Deny): "))
             if response.lower() == 'accept':
                 find_req.update_row('to_be_member', self.id, 'Response', 'Accept')
-
                 find_req.update_row('to_be_member', self.id, 'Response_date', datetime.date.today())
                 member_req_table = alldata.search('member_pending_request')
                 find_other_req = member_req_table.filter(lambda x: x['Response'] == 'HasNotRespond')
@@ -179,6 +178,7 @@ class Student:
             eval_table.insert_row({'ProjectID': id_input, 'Report': 'None', 'Score': 0, 'Note': 'None'})
             self.update_table('project', self.project_data)
             member_req_table.update_row('to_be_member', self.id, 'Response', 'Deny')
+            member_req_table.update_row('to_be_member', self.id, 'Response_date', datetime.date.today())
             change_role(self.id, 'lead')
             print("Project has been initialized, returning to menu...")
         exit()
@@ -391,7 +391,7 @@ class Leader:
         exit()
 
     def submit_project(self):
-        if self.project_mem2 == 'None':
+        if self.project_mem2 == 'None' or self.project_mem1 == 'None':
             print(f"To submit, your project must have 2 members.")
             return None
         elif self.project_advisor == 'None':
@@ -679,6 +679,7 @@ class Faculty:
                 adv_req_table = alldata.search('advisor_pending_request')
                 find_other_req = adv_req_table.filter(lambda x: x['Response'] == 'HasNotRespond')
                 find_other_req.update('to_be_advisor', self.id, 'Response', 'Deny')
+                find_other_req.update_row('to_be_advisor', self.id, 'Response_date', datetime.date.today())
                 print(f"You have accepted the request to projectID({project_res}).")
                 print("Returning to menu...")
                 break
@@ -700,17 +701,13 @@ class Faculty:
         while True:
             print("You have permission to do the following:")
             print("1. Check inbox.")
-            print("2. Approve a project (for now this does nothing).")
-            print("3. Logout.")
+            print("2. Logout.")
 
             choice = int(input("Enter your choice: "))
             if choice == '1':
                 print()
                 self.check_inbox()
             elif choice == '2':
-                print()
-                self.approve_project()
-            elif choice == '3':
                 print()
                 print("You have logged out.")
                 break
@@ -772,10 +769,12 @@ class Advisor:
         else:
             result = 'Disapproved'
         print(f"You graded the project {score} out of 100. The project will be {result}.")
+        note = str(input("Please enter your comment/advise on the project: "))
         while True:
             confirm = str(input("Do you wish to confirm your evaluation? (Y/N): "))
             if confirm.lower() == 'y':
                 eval_table.update_row('ProjectID', self.project_id, 'Score', score)
+                eval_table.update_row('ProjectID', self.project_id, 'Note', note)
                 project_table.update_row('ProjectID', self.project_id, 'Status', result)
                 print(f"Your evaluation has been confirmed. Returning to menu...")
                 break
@@ -831,6 +830,73 @@ class Advisor:
             print()
 
 
+class Admin:
+    def __init__(self, data):
+        self.data = data
+        self.id = data['ID']
+        self.first = data['first']
+        self.last = data['last']
+        self.type = data['type']
+
+        self.run()
+
+    def __str__(self):
+        return (f"You logged in as {self.first} {self.last}. \n"
+                f"You are a {self.type}.")
+
+    def remove_person(self):
+        print("You're now removing a person from a project.")
+        project_table = alldata.search('project')
+        print("List of projects.")
+        print(project_table.table)
+        project_allID = project_table.select('ProjectID')
+        while True:
+            project_choose = str(input("Please enter the projectID you want to remove a person from: "))
+            project_exists = False
+            for project in project_allID:
+                if project['ProjectID'] == project_choose:
+                    project_exists = True
+                    break
+            if project_exists:
+                break
+            else:
+                print(f"Invalid ProjectID.")
+        project_find = project_table.filter(lambda x: x['ProjectID'] == project_choose)
+        while True:
+            person_to_remove = str(input("Which person do you want to remove from this project (Leader, Member1, Member2, Advisor): "))
+
+
+
+
+
+
+    def modify_project(self):
+        pass
+
+    def run(self):
+        print(self)
+        print()
+        while True:
+            print("You have permission to do the following:")
+            print("1. Remove a person from a project.")
+            print("2. Modify project.")
+            print("3. Logout.")
+            choice = str(input("Enter your choice: "))
+            if choice == '1':
+                print()
+                self.remove_person()
+            elif choice == '2':
+                print()
+                self.modify_project()
+            elif choice == '3':
+                print()
+                print("You have logged out.")
+                break
+            else:
+                print("Choice Invalid. Try again.")
+                print()
+            print()
+
 # define a function called exit
 def exit():
     tables = {
@@ -878,7 +944,7 @@ user_data = get_data(val[0])
 
 if val[1] == 'admin':
     #see and do admin related activities
-    pass
+    admin1 = Admin(user_data)
 elif val[1] == 'student':
     #see and do student related activities
     student1 = Student(user_data)
