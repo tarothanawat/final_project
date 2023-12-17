@@ -236,7 +236,7 @@ class Leader:
             while True:
                 member_id = str(input("Enter their ID: "))
                 find_mem_req = find_project_req.filter(lambda x: x['to_be_member'] == member_id)
-                if find_mem_req.table[0]['Response'] != 'Accepted':
+                if find_mem_req.table[0]['Response'] != 'Accept':
                     print("Invalid ID(the student didn't accept your invitation or is already in a group). Please try again.")
                     continue
 
@@ -283,7 +283,7 @@ class Leader:
             while True:
                 prof_id = str(input("Enter their ID: "))
                 find_prof_req = find_project_req.filter(lambda x: x['to_be_advisor'] == prof_id)
-                if find_prof_req.table[0]['Response'] != 'Accepted':
+                if find_prof_req.table[0]['Response'] != 'Accept':
                     print(
                         "Invalid ID(the professor didn't accept your request or is already an advisor of a group). Please try again.")
                     continue
@@ -303,7 +303,7 @@ class Leader:
                     find_project.update_row('ProjectID', self.project_id, 'Advisor', prof_id)
                     change_role(prof_id, 'advisor')
                     # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
-                    find_project_req.update_row('to_be_member', prof_id, 'Response', 'IsAnAdvisor')
+                    find_project_req.update_row('to_be_advisor', prof_id, 'Response', 'IsAnAdvisor')
                     print(f"{first} {last} is now your project advisor. Returning to menu...")
                 else:
                     print("Your group already has an advisor. Returning to menu...")
@@ -387,7 +387,90 @@ class Leader:
 
 class Faculty:
     def __init__(self, data):
+        self.data = data
+        self.id = data['ID']
+        self.first = data['first']
+        self.last = data['last']
+        self.type = data['type']
+
+        # print(self.project_id)
+        self.pending_request = {}
+        self.project_data = {}
+        self.run()
+
+    def __str__(self):
+        return (f"You logged in as {self.first} {self.last}. \n"
+                f"You are a {self.type}.")
+
+    def approve_project(self):
         pass
+
+    def check_inbox(self):
+        project_table = alldata.search('project')
+        pending_req_table = alldata.search('advisor_pending_request')
+        find_req = pending_req_table.filter(lambda x: x['to_be_advisor'] == self.id)
+        print(f"You have {len(find_req.table)} pending request(s).")
+        for data in find_req.table:
+            find_project = project_table.filter(lambda x: x['ProjectID'] == data['ProjectID'])
+            project_data = find_project.table[0]
+            get_leader = get_data(project_data['Lead'])
+            print(f"{get_leader['first']} {get_leader['last']} has requested you to be an advisor for their project group.")
+            print(f"ProjectID: {project_data['ProjectID']} Title: {project_data['Title']}")
+            print()
+
+        print("Choose which request you want to response to.")
+        while True:
+            project_res = str(input("Enter the ProjectID: "))
+            find_req = pending_req_table.filter(lambda x: x['ProjectID'] == project_res)
+            if find_req != []:
+                break
+            print("Invalid ProjectID. Try again.")
+        find_req = pending_req_table.filter(lambda x: x['ProjectID'] == project_res)
+        while True:
+            response = str(input("What is your response? (Accept/Deny): "))
+            if response.lower() == 'accept':
+                find_req.update_row('to_be_advisor', self.id, 'Response', 'Accept')
+                date = str(input("Enter the date of response (Date/Month): "))
+                find_req.update_row('to_be_advisor', self.id, 'Response_date', date)
+                print(f"You have accepted the request to projectID({project_res}).")
+                print("Returning to menu...")
+                break
+            elif response.lower() != 'deny':
+                find_req.update_row('to_be_advisor', self.id, 'Response', 'Deny')
+                date = str(input("Enter the date of response (Date/Month): "))
+                find_req.update_row('to_be_advisor', self.id, 'Response_date', date)
+                print(find_req.table)
+                print(f"You have denied the request to projectID({project_res}).")
+                print("Returning to menu...")
+                break
+            elif response.lower() != 'accept' or response.lower() != 'deny':
+                print("Your response is invalid. Tryagain.")
+                continue
+        exit()
+
+    def run(self):
+        print(self)
+        print()
+        while True:
+            print("You have permission to do the following:")
+            print("1. Check inbox.")
+            print("2. Approve a project (for now this does nothing).")
+            print("3. Logout.")
+
+            choice = int(input("Enter your choice: "))
+            if choice == 1:
+                print()
+                self.check_inbox()
+            elif choice == 2:
+                print()
+                self.approve_project()
+            elif choice == 3:
+                print()
+                print("You have logged out.")
+                break
+            print()
+
+
 class Project:
     def __init__(self):
         pass
@@ -450,7 +533,7 @@ elif val[1] == 'lead':
     pass
 elif val[1] == 'faculty':
     #see and do faculty related activities
-    pass
+    faculty1 = Faculty(user_data)
 elif val[1] == 'advisor':
     #see and do advisor related activities
     pass
