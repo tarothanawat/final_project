@@ -391,7 +391,28 @@ class Leader:
         exit()
 
     def submit_project(self):
-        pass
+        if self.project_mem2 == 'None':
+            print(f"To submit, your project must have 2 members.")
+            return None
+        elif self.project_advisor == 'None':
+            print("You need an advisor to submit a project.")
+            return None
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        eval_data = find_eval.table[0]
+        project_table = alldata.search('project')
+        print("You're now submitting your project.")
+        print("This report will get evaluated by your advisor")
+        print(f"Report: {eval_data['Report']}")
+        while True:
+            confirm = str(input("Do you wish to submit your project? (Y/N): "))
+            if confirm.lower() == 'y':
+                project_table.update_row("ProjectID", self.project_id, "Status", 'WaitingForApproval')
+                print(f"Your report has been sent to your advisor.")
+                break
+            elif confirm.lower() == 'n':
+                print("Returning to menu...")
+                break
 
     def modify_project(self):
         project_table = alldata.search('project')
@@ -725,7 +746,44 @@ class Advisor:
                 f"You are a {self.type}.")
 
     def check_inbox(self):
-        pass
+        project_table = alldata.search('project')
+        find_req = project_table.filter(lambda x: x['Status'] == 'WaitingForApproval')
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        eval_data = find_eval.table[0]
+        print(f"You have {len(find_req.table)} pending request for approval.")
+        if len(find_req.table) == 0:
+            print("Returning to menu...")
+            return None
+        print()
+        print(f"Title: {self.project_title}")
+        print(f"Project Leader: {self.project_lead}")
+        print(f"Member 1: {self.project_mem1}")
+        print(f"Member 2: {self.project_mem2}")
+        print(f"Report: {eval_data['Report']}")
+        print()
+        while True:
+            score = int(input("Please grade this project report out of 100 (use integers): "))
+            if 0 <= score <=100:
+                break
+            print(f"Score must be within 0-100")
+        if score >= 70:
+            result = 'Approved'
+        else:
+            result = 'Disapproved'
+        print(f"You graded the project {score} out of 100. The project will be {result}.")
+        while True:
+            confirm = str(input("Do you wish to confirm your evaluation? (Y/N): "))
+            if confirm.lower() == 'y':
+                eval_table.update_row('ProjectID', self.project_id, 'Score', score)
+                project_table.update_row('ProjectID', self.project_id, 'Status', result)
+                print(f"Your evaluation has been confirmed. Returning to menu...")
+                break
+            elif confirm.lower() == 'n':
+                print("Project evaluation process has been cancelled. Returning to menu...")
+                break
+            else:
+                print("Invalid input. Try again.")
 
     def check_status(self):
         get_lead_data = get_data(self.project_lead)
@@ -771,11 +829,6 @@ class Advisor:
                 print("Choice Invalid. Try again.")
                 print()
             print()
-
-
-class Project:
-    def __init__(self):
-        pass
 
 
 # define a function called exit
