@@ -25,3 +25,8 @@
 - {Member Class}
   - You can not view your project if your project doesn't have 2 members and an advisor already.(It will result in Error.)
     - (Fixed); now when get_data can't find a person data it will display as 'None'
+
+{Modifying a project; class Member and Leader}
+- Modifying a project means actions such as....
+  - editing project title
+  - editing the Report in evaluation.csv

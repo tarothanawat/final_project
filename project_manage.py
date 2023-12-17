@@ -236,6 +236,9 @@ class Leader:
         get_mem1_data = get_data(self.project_mem1)
         get_mem2_data = get_data(self.project_mem2)
         get_advisor_data = get_data(self.project_advisor)
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        eval_data = find_eval.table[0]
         print("You are now viewing your project status.")
         print()
         print(f"ProjectID : {self.project_id}")
@@ -244,10 +247,10 @@ class Leader:
         print(f"Member1 : {get_mem1_data['first']} {get_mem1_data['last']} ({self.project_mem1})")
         print(f"Member2 : {get_mem2_data['first']} {get_mem2_data['last']} ({self.project_mem2})")
         print(f"Advisor : {get_advisor_data['first']} {get_advisor_data['last']} ({self.project_advisor})")
+        print(f"Project Report: {eval_data['Report']}")
+        print(f"Project Score: {eval_data['Score']}")
+        print(f"Note from advisor: {eval_data['Note']}")
         print(f"Project Status : {self.project_status}")
-
-    def modify_project(self):
-        print("What do you want to do?")
 
     def check_inbox(self):
         member_pending_table = alldata.search('member_pending_request')
@@ -389,6 +392,60 @@ class Leader:
 
     def submit_project(self):
         pass
+
+    def modify_project(self):
+        project_table = alldata.search('project')
+        find_project = project_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        eval_table = alldata.search('evaluation')
+
+        while True:
+            print("What do you want to do?")
+            print("1. Change the project title.")
+            print("2. Write a report. (replacing the old one)")
+            print("3. Return to menu.")
+            choice = str(input("Enter your choice: "))
+            if choice == '1':
+                print()
+                new_title = str(input("Enter your new project title: "))
+                print(f"You're changing the project title from {self.project_title} to {new_title}")
+                while True:
+                    confirm = str(input("Are you sure? (Y/N): "))
+                    if confirm.lower() == 'y':
+                        project_table.update_row('ProjectID', self.project_id, 'Title', new_title)
+                        print(f"Your new project title is {find_project.table[0]['Title']}")
+                        break
+                    elif confirm.lower() == 'n':
+                        print("Project title changing process has been cancelled. Returning to menu...")
+                        break
+                    else:
+                        print("Invalid input. Try again.")
+                break
+            elif choice == '2':
+                print()
+                print("You're now writing a new report.")
+                new_report = str(input("Write down your report: "))
+                print(f"This is your new report: {new_report}")
+                while True:
+                    confirm = str(input("Are you sure? (Y/N): "))
+                    if confirm.lower() == 'y':
+                        eval_table.update_row('ProjectID', self.project_id, 'Report', new_report)
+                        print(f"Your new project report has been updated. Returning to menu...")
+                        break
+                    elif confirm.lower() == 'n':
+                        print("Project title changing process has been cancelled. Returning to menu...")
+                        break
+                    else:
+                        print("Invalid input. Try again.")
+                break
+            elif choice == '3':
+                print()
+                print("Returning to menu...")
+                break
+            else:
+                print("Choice Invalid. Try again.")
+                print()
+
+
     def run(self):
         print(self)
         print()
@@ -421,6 +478,129 @@ class Leader:
                 print()
                 self.submit_project()
             elif choice == '7':
+                print("You have logged out.")
+                break
+            else:
+                print("Choice Invalid. Try again.")
+                print()
+            print()
+
+
+class Member:
+    def __init__(self, data):
+        self.data = data
+        self.id = data['ID']
+        self.first = data['first']
+        self.last = data['last']
+        self.type = data['type']
+        project_table = alldata.search('project')
+        find_project = project_table.filter(lambda x: x['Member1'] == self.id or x['Member2'] == self.id)
+        self.lead_id = find_project.table[0]['Lead']
+        self.project_data = get_project(self.lead_id)
+        self.project_id = self.project_data['ProjectID']
+        self.project_title = self.project_data['Title']
+        self.project_lead = self.project_data['Lead']
+        self.project_mem1 = self.project_data['Member1']
+        self.project_mem2 = self.project_data['Member2']
+        self.project_advisor = self.project_data['Advisor']
+        self.project_status = self.project_data['Status']
+        self.pending_request = {}
+        self.run()
+
+    def __str__(self):
+        return (f"You logged in as {self.first} {self.last}. \n"
+                f"You are a {self.type}.")
+
+    def modify_project(self):
+        project_table = alldata.search('project')
+        find_project = project_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        eval_table = alldata.search('evaluation')
+
+        while True:
+            print("What do you want to do?")
+            print("1. Change the project title.")
+            print("2. Write a report. (replacing the old one)")
+            print("3. Return to menu.")
+            choice = str(input("Enter your choice: "))
+            if choice == '1':
+                print()
+                new_title = str(input("Enter your new project title: "))
+                print(f"You're changing the project title from {self.project_title} to {new_title}")
+                while True:
+                    confirm = str(input("Are you sure? (Y/N): "))
+                    if confirm.lower() == 'y':
+                        project_table.update_row('ProjectID', self.project_id, 'Title', new_title)
+                        print(f"Your new project title is {find_project.table[0]['Title']}")
+                        break
+                    elif confirm.lower() == 'n':
+                        print("Project title changing process has been cancelled. Returning to menu...")
+                        break
+                    else:
+                        print("Invalid input. Try again.")
+                break
+            elif choice == '2':
+                print()
+                print("You're now writing a new report.")
+                new_report = str(input("Write down your report: "))
+                print(f"This is your new report: {new_report}")
+                while True:
+                    confirm = str(input("Are you sure? (Y/N): "))
+                    if confirm.lower() == 'y':
+                        eval_table.update_row('ProjectID', self.project_id, 'Report', new_report)
+                        print(f"Your new project report has been updated. Returning to menu...")
+                        break
+                    elif confirm.lower() == 'n':
+                        print("Project title changing process has been cancelled. Returning to menu...")
+                        break
+                    else:
+                        print("Invalid input. Try again.")
+                break
+            elif choice == '3':
+                print()
+                print("Returning to menu...")
+                break
+            else:
+                print("Choice Invalid. Try again.")
+                print()
+
+    def check_status(self):
+        get_lead_data = get_data(self.project_lead)
+        get_mem1_data = get_data(self.project_mem1)
+        get_mem2_data = get_data(self.project_mem2)
+        get_advisor_data = get_data(self.project_advisor)
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        eval_data = find_eval.table[0]
+        print("You are now viewing your project status.")
+        print()
+        print(f"ProjectID : {self.project_id}")
+        print(f"Title : {self.project_title}")
+        print(f"Leader : {get_lead_data['first']} {get_lead_data['last']} ({self.project_lead})")
+        print(f"Member1 : {get_mem1_data['first']} {get_mem1_data['last']} ({self.project_mem1})")
+        print(f"Member2 : {get_mem2_data['first']} {get_mem2_data['last']} ({self.project_mem2})")
+        print(f"Advisor : {get_advisor_data['first']} {get_advisor_data['last']} ({self.project_advisor})")
+        print(f"Project Report: {eval_data['Report']}")
+        print(f"Project Score: {eval_data['Score']}")
+        print(f"Note from advisor: {eval_data['Note']}")
+        print(f"Project Status : {self.project_status}")
+
+    def run(self):
+        print(self)
+        print()
+        while True:
+            print("You have permission to do the following:")
+            print("1. See project status.")
+            print("2. Modify project.")
+            print("3. Logout.")
+            choice = str(input("Enter your choice: "))
+            if choice == '1':
+                print()
+                self.check_status()
+            elif choice == '2':
+                print()
+                self.modify_project()
+            elif choice == '3':
+                print()
                 print("You have logged out.")
                 break
             else:
@@ -526,10 +706,17 @@ class Advisor:
         self.first = data['first']
         self.last = data['last']
         self.type = data['type']
-
-        self.project_data = get_project(self.id)
+        project_table = alldata.search('project')
+        find_project = project_table.filter(lambda x: x['Advisor'] == self.id)
+        self.lead_id = find_project.table[0]['Lead']
+        self.project_data = get_project(self.lead_id)
         self.project_id = self.project_data['ProjectID']
-        # print(self.project_id)
+        self.project_title = self.project_data['Title']
+        self.project_lead = self.project_data['Lead']
+        self.project_mem1 = self.project_data['Member1']
+        self.project_mem2 = self.project_data['Member2']
+        self.project_advisor = self.project_data['Advisor']
+        self.project_status = self.project_data['Status']
         self.pending_request = {}
         self.run()
 
@@ -541,7 +728,25 @@ class Advisor:
         pass
 
     def check_status(self):
-        pass
+        get_lead_data = get_data(self.project_lead)
+        get_mem1_data = get_data(self.project_mem1)
+        get_mem2_data = get_data(self.project_mem2)
+        get_advisor_data = get_data(self.project_advisor)
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        eval_data = find_eval.table[0]
+        print("You are now viewing your project status.")
+        print()
+        print(f"ProjectID : {self.project_id}")
+        print(f"Title : {self.project_title}")
+        print(f"Leader : {get_lead_data['first']} {get_lead_data['last']} ({self.project_lead})")
+        print(f"Member1 : {get_mem1_data['first']} {get_mem1_data['last']} ({self.project_mem1})")
+        print(f"Member2 : {get_mem2_data['first']} {get_mem2_data['last']} ({self.project_mem2})")
+        print(f"Advisor : {get_advisor_data['first']} {get_advisor_data['last']} ({self.project_advisor})")
+        print(f"Project Report: {eval_data['Report']}")
+        print(f"Project Score: {eval_data['Score']}")
+        print(f"Note from advisor: {eval_data['Note']}")
+        print(f"Project Status : {self.project_status}")
 
     def run(self):
         print(self)
@@ -626,7 +831,7 @@ elif val[1] == 'student':
     student1 = Student(user_data)
 elif val[1] == 'member':
     #see and do member related activities
-    pass
+    member1 = Member(user_data)
 elif val[1] == 'lead':
     leader1 = Leader(user_data)
 elif val[1] == 'faculty':
