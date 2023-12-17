@@ -16,3 +16,10 @@
 - Project grading.
   - The project will change status to 'Approved' if score >=70 else: 'Disapproved'
   - If a project is disapproved advisor need to sent them a note on how to improve their project.
+
+{Bugs (there are more, maybe not founded.)}
+- {Leader Class}
+  - You can not view your project if your project doesn't have 2 members and an advisor already.(It will result in Error.) 
+
+- {Member Class}
+  - You can not view your project if your project doesn't have 2 members and an advisor already.(It will result in Error.)
