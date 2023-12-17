@@ -70,6 +70,7 @@ def get_data(ID):
     # print(user_data.table[0])
     if user_data == []:
         return None
+    print(user_data.table[0])
     return user_data.table[0]
 
 def get_role(ID):
@@ -171,8 +172,8 @@ class Student:
                 print()
 
             title = input("Enter your project Title: ")
-            self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
-            eval_table.insert_row({'ProjectID': id_input, 'Report': None, 'Score': 0, 'Note': None})
+            self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': 'None', 'Member2': 'None', 'Advisor': 'None', 'Status': 'Pending'})
+            eval_table.insert_row({'ProjectID': id_input, 'Report': 'None', 'Score': 0, 'Note': 'None'})
             self.update_table('project', self.project_data)
             change_role(self.id, 'lead')
             print("Project has been initialized, returning to menu...")

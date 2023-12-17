@@ -20,6 +20,8 @@
 {Bugs (there are more, maybe not founded.)}
 - {Leader Class}
   - You can not view your project if your project doesn't have 2 members and an advisor already.(It will result in Error.) 
+    - - (Fixed); now when get_data can't find a person data it will display as 'None'
 
 - {Member Class}
   - You can not view your project if your project doesn't have 2 members and an advisor already.(It will result in Error.)
+    - (Fixed); now when get_data can't find a person data it will display as 'None'
