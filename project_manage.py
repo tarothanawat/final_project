@@ -20,18 +20,21 @@ def initializing():
     project = read_csv('project.csv')
     advisor_pending = read_csv('advisor_pending_request.csv')
     member_pending = read_csv('member_pending_request.csv')
+    evaluation = read_csv('evaluation.csv')
 
     persons_table = Table("persons", persons)
     login_table = Table("login", login)
     project_table = Table('project', project)
     advisor_pending_table = Table('advisor_pending_request', advisor_pending)
     member_pending_table = Table('member_pending_request', member_pending)
+    evaluation_table = Table('evaluation', evaluation)
 
     alldata.insert(persons_table)
     alldata.insert(login_table)
     alldata.insert(project_table)
     alldata.insert(advisor_pending_table)
     alldata.insert(member_pending_table)
+    alldata.insert(evaluation_table)
 
 
 # define a function called login
@@ -358,7 +361,7 @@ class Leader:
         print()
         while True:
             print("You have permission to do the following:")
-            print("1. See project status.")
+            print("1. See project status and submit.")
             print("2. See and modify project info.")
             print("3. Check inbox.")
             print("4. Invite members.")
@@ -490,8 +493,32 @@ class Advisor:
         return (f"You logged in as {self.first} {self.last}. \n"
                 f"You are a {self.type}.")
 
-    def run(self):
+    def check_inbox(self):
         pass
+
+    def check_status(self):
+        pass
+
+    def run(self):
+        print(self)
+        print()
+        while True:
+            print("You have permission to do the following:")
+            print("1. Check inbox (for project approval).")
+            print("2. See project status.")
+            print("3. Logout.")
+            choice = int(input("Enter your choice: "))
+            if choice == 1:
+                print()
+                self.check_inbox()
+            elif choice == 2:
+                print()
+                self.check_status()
+            elif choice == 3:
+                print()
+                print("You have logged out.")
+                break
+            print()
 
 
 class Project:
@@ -506,7 +533,8 @@ def exit():
         'persons': 'persons.csv',
         'project': 'project.csv',
         'advisor_pending_request': 'advisor_pending_request.csv',
-        'member_pending_request': 'member_pending_request.csv'
+        'member_pending_request': 'member_pending_request.csv',
+        'evaluation': 'evaluation.csv'
     }
 
     field_names = {
@@ -514,7 +542,8 @@ def exit():
         'persons': ['ID', 'first', 'last', 'type'],
         'project': ['ProjectID', "Title", "Lead", 'Member1', 'Member2', 'Advisor', 'Status'],
         'advisor_pending_request': ['ProjectID', 'to_be_advisor', 'Response', 'Response_date'],
-        'member_pending_request': ['ProjectID', 'to_be_member', 'Response', 'Response_date']
+        'member_pending_request': ['ProjectID', 'to_be_member', 'Response', 'Response_date'],
+        'evaluation': ['ProjectID', 'Report', 'Score', 'Note']
     }
 
     for table_name, file_name in tables.items():
@@ -559,7 +588,7 @@ elif val[1] == 'faculty':
     faculty1 = Faculty(user_data)
 elif val[1] == 'advisor':
     #see and do advisor related activities
-    advisor1 = Advisor()
+    advisor1 = Advisor(user_data)
 
 
 
