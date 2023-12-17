@@ -22,6 +22,7 @@ def read_csv(filename):
             info.append(dict(r))
     return info
 
+
 def write_csv(filename, data):
     with open(os.path.join(__location__, filename), mode='w', newline='') as file:
         fieldnames = data[0].keys
@@ -106,6 +107,11 @@ class Table:
             if i[primary_attribute] == primary_attribute_value:
                 i[update_attribute] = update_value
 
+    # def delete_row(self, primary_attribute, primary_attribute_value, del_attribute, del_value):
+    #     for i in self.table:
+    #         if i[primary_attribute] == primary_attribute_value and i[del_attribute] == del_value:
+    #             print(self.table[i])
+    #             # self.table.remove(i)
 
     def pivot_table(self, keys_to_pivot_list, keys_to_aggreagte_list, aggregate_func_list):
 

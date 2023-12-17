@@ -241,10 +241,14 @@ class Leader:
             if find_project.table[0]['Member1'] == '':
                 find_project.update_row('ProjectID', self.project_id, 'Member1', member_id)
                 change_role(member_id, 'member')
+                # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
+                find_project_req.update_row('to_be_member', member_id, 'Response', 'JoinedGroup')
                 print(f"{first} {last} has been added to your group as Member1. Returning to menu...")
             elif find_project.table[0]['Member2'] == '':
                 find_project.update_row('ProjectID', self.project_id, 'Member2', member_id)
                 change_role(member_id, 'member')
+                # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
+                find_project_req.update_row('to_be_member', member_id, 'Response', 'JoinedGroup')
                 print(f"{first} {last} has been added to your group as Member2. Returning to menu...")
             else:
                 print("Your exceeds the limit of 2 members, you can't add more. Returning to menu...")
