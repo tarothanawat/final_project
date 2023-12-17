@@ -385,6 +385,7 @@ class Leader:
                 break
             print()
 
+
 class Faculty:
     def __init__(self, data):
         self.data = data
@@ -471,6 +472,28 @@ class Faculty:
             print()
 
 
+class Advisor:
+    def __init__(self, data):
+        self.data = data
+        self.id = data['ID']
+        self.first = data['first']
+        self.last = data['last']
+        self.type = data['type']
+
+        self.project_data = get_project(self.id)
+        self.project_id = self.project_data['ProjectID']
+        # print(self.project_id)
+        self.pending_request = {}
+        self.run()
+
+    def __str__(self):
+        return (f"You logged in as {self.first} {self.last}. \n"
+                f"You are a {self.type}.")
+
+    def run(self):
+        pass
+
+
 class Project:
     def __init__(self):
         pass
@@ -536,7 +559,7 @@ elif val[1] == 'faculty':
     faculty1 = Faculty(user_data)
 elif val[1] == 'advisor':
     #see and do advisor related activities
-    pass
+    advisor1 = Advisor()
 
 
 
