@@ -3,11 +3,11 @@ ID,username,password,role
 9898118,Lionel.M,2977,lead
 5662557,Manuel.N,1244,member
 5687866,Robert.L,8176,member
-3557832,Gareth.B,9462,student
-2592572,Thibaut.C,1985,student
+3557832,Gareth.B,9462,lead
+2592572,Thibaut.C,1985,lead
 1554306,Eden.H,9106,student
 4788888,Thiago.S,5052,student
-1863421,Sergio.R,7228,student
+1863421,Sergio.R,7228,lead
 4865631,Paul.P,6956,student
 7476758,Antoine.G,6795,student
 3938213,Marco.R,8512,student

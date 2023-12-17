@@ -2,6 +2,7 @@
 import database
 from database import read_csv, DB, Table, write_csv
 import csv
+import datetime
 # define a funcion called initializing
 
 def initializing():
@@ -70,7 +71,6 @@ def get_data(ID):
     # print(user_data.table[0])
     if user_data == []:
         return None
-    print(user_data.table[0])
     return user_data.table[0]
 
 def get_role(ID):
@@ -132,15 +132,17 @@ class Student:
             response = str(input("What is your response? (Accept/Deny): "))
             if response.lower() == 'accept':
                 find_req.update_row('to_be_member', self.id, 'Response', 'Accept')
-                date = str(input("Enter the date of response (Date/Month): "))
-                find_req.update_row('to_be_member', self.id, 'Response_date', date)
+
+                find_req.update_row('to_be_member', self.id, 'Response_date', datetime.date.today())
+                member_req_table = alldata.search('member_pending_request')
+                find_other_req = member_req_table.filter(lambda x: x['Response'] == 'HasNotRespond')
+                find_other_req.update('to_be_member', self.id, 'Response', 'Deny')
                 print(f"You have accepted the request to projectID({project_res}).")
                 print("Returning to menu...")
                 break
             elif response.lower() != 'deny':
                 find_req.update_row('to_be_member', self.id, 'Response', 'Deny')
-                date = str(input("Enter the date of response (Date/Month): "))
-                find_req.update_row('to_be_member', self.id, 'Response_date', date)
+                find_req.update_row('to_be_member', self.id, 'Response_date', datetime.date.today())
                 print(find_req.table)
                 print(f"You have denied the request to projectID({project_res}).")
                 print("Returning to menu...")
@@ -153,6 +155,7 @@ class Student:
     def create_project(self):
         project_table = alldata.search('project')
         eval_table = alldata.search('evaluation')
+        member_req_table = alldata.search('member_pending_request')
         project_id = project_table.aggregate(lambda x: str(x), 'ProjectID')
         # print(project_id)
         print("To create a project you will be promoted to be a leader and you must deny all pending invites.")
@@ -175,6 +178,7 @@ class Student:
             self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': 'None', 'Member2': 'None', 'Advisor': 'None', 'Status': 'Pending'})
             eval_table.insert_row({'ProjectID': id_input, 'Report': 'None', 'Score': 0, 'Note': 'None'})
             self.update_table('project', self.project_data)
+            member_req_table.update_row('to_be_member', self.id, 'Response', 'Deny')
             change_role(self.id, 'lead')
             print("Project has been initialized, returning to menu...")
         exit()
@@ -187,16 +191,19 @@ class Student:
             print("1. Check inbox.")
             print("2. Create a project.")
             print("3. Logout.")
-            choice = int(input("Enter your choice: "))
-            if choice == 1:
+            choice = str(input("Enter your choice: "))
+            if choice == '1':
                 print()
                 self.check_inbox()
-            elif choice == 2:
+            elif choice == '2':
                 print()
                 self.create_project()
-            elif choice == 3:
+            elif choice == '3':
                 print("You have logged out.")
                 break
+            else:
+                print("Choice Invalid. Try again.")
+                print()
             print()
         #update all tables call function exit()
 
@@ -278,13 +285,13 @@ class Leader:
             print(f"You're about to add {first} {last} to your group.")
             confirm = str(input("Do you wish to confirm? (Y/N): "))
             if confirm.lower() == 'y':
-                if find_project.table[0]['Member1'] == '':
+                if find_project.table[0]['Member1'] == 'None':
                     find_project.update_row('ProjectID', self.project_id, 'Member1', member_id)
                     change_role(member_id, 'member')
                     # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
                     find_project_req.update_row('to_be_member', member_id, 'Response', 'JoinedGroup')
                     print(f"{first} {last} has been added to your group as Member1. Returning to menu...")
-                elif find_project.table[0]['Member2'] == '':
+                elif find_project.table[0]['Member2'] == 'None':
                     find_project.update_row('ProjectID', self.project_id, 'Member2', member_id)
                     change_role(member_id, 'member')
                     # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
@@ -326,7 +333,7 @@ class Leader:
             print(f"You're about to let {first} {last} to be the advisor your group.")
             confirm = str(input("Do you wish to confirm? (Y/N): "))
             if confirm.lower() == 'y':
-                if find_project.table[0]['Advisor'] == '':
+                if find_project.table[0]['Advisor'] == 'None':
                     find_project.update_row('ProjectID', self.project_id, 'Advisor', prof_id)
                     change_role(prof_id, 'advisor')
                     # find_project_req.delete_row('ProjectID', self.project_id, 'to_be_member', member_id)
@@ -387,35 +394,38 @@ class Leader:
         print()
         while True:
             print("You have permission to do the following:")
-            print("1. See project status. (You must have 2 members and an advisor.)")
+            print("1. See project status.")
             print("2. See and modify project info.")
             print("3. Check inbox.")
             print("4. Invite members.")
             print("5. Send request to a professor.")
             print("6. Submit your project.")
             print("7. Logout")
-            choice = int(input("Enter your choice: "))
-            if choice == 1:
+            choice = str(input("Enter your choice: "))
+            if choice == '1':
                 print()
                 self.check_status()
-            elif choice == 2:
+            elif choice == '2':
                 print()
                 self.modify_project()
-            elif choice == 3:
+            elif choice == '3':
                 print()
                 self.check_inbox()
-            elif choice == 4:
+            elif choice == '4':
                 print()
                 self.invite_members()
-            elif choice == 5:
+            elif choice == '5':
                 print()
                 self.request_prof()
-            elif choice == 6:
+            elif choice == '6':
                 print()
                 self.submit_project()
-            elif choice == 7:
+            elif choice == '7':
                 print("You have logged out.")
                 break
+            else:
+                print("Choice Invalid. Try again.")
+                print()
             print()
 
 
@@ -464,15 +474,16 @@ class Faculty:
             response = str(input("What is your response? (Accept/Deny): "))
             if response.lower() == 'accept':
                 find_req.update_row('to_be_advisor', self.id, 'Response', 'Accept')
-                date = str(input("Enter the date of response (Date/Month): "))
-                find_req.update_row('to_be_advisor', self.id, 'Response_date', date)
+                find_req.update_row('to_be_advisor', self.id, 'Response_date', datetime.date.today())
+                adv_req_table = alldata.search('advisor_pending_request')
+                find_other_req = adv_req_table.filter(lambda x: x['Response'] == 'HasNotRespond')
+                find_other_req.update('to_be_advisor', self.id, 'Response', 'Deny')
                 print(f"You have accepted the request to projectID({project_res}).")
                 print("Returning to menu...")
                 break
             elif response.lower() != 'deny':
                 find_req.update_row('to_be_advisor', self.id, 'Response', 'Deny')
-                date = str(input("Enter the date of response (Date/Month): "))
-                find_req.update_row('to_be_advisor', self.id, 'Response_date', date)
+                find_req.update_row('to_be_advisor', self.id, 'Response_date', datetime.date.today())
                 print(find_req.table)
                 print(f"You have denied the request to projectID({project_res}).")
                 print("Returning to menu...")
@@ -492,16 +503,19 @@ class Faculty:
             print("3. Logout.")
 
             choice = int(input("Enter your choice: "))
-            if choice == 1:
+            if choice == '1':
                 print()
                 self.check_inbox()
-            elif choice == 2:
+            elif choice == '2':
                 print()
                 self.approve_project()
-            elif choice == 3:
+            elif choice == '3':
                 print()
                 print("You have logged out.")
                 break
+            else:
+                print("Choice Invalid. Try again.")
+                print()
             print()
 
 
@@ -537,17 +551,20 @@ class Advisor:
             print("1. Check inbox (for project approval).")
             print("2. See project status.")
             print("3. Logout.")
-            choice = int(input("Enter your choice: "))
-            if choice == 1:
+            choice = str(input("Enter your choice: "))
+            if choice == '1':
                 print()
                 self.check_inbox()
-            elif choice == 2:
+            elif choice == '2':
                 print()
                 self.check_status()
-            elif choice == 3:
+            elif choice == '3':
                 print()
                 print("You have logged out.")
                 break
+            else:
+                print("Choice Invalid. Try again.")
+                print()
             print()
 
 
@@ -612,7 +629,6 @@ elif val[1] == 'member':
     pass
 elif val[1] == 'lead':
     leader1 = Leader(user_data)
-    pass
 elif val[1] == 'faculty':
     #see and do faculty related activities
     faculty1 = Faculty(user_data)

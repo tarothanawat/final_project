@@ -38,3 +38,8 @@ What should be displayed when we login as each roles?
 
 [project_manage.py]
     - need to implement a way to update data in csv files to table classes.
+
+{Things to do}
+- Need to implement denying other request when accepting an invitation or request to be an advisor. :D
+- Has a loop-hole where if you deny a prof to be an advisor nothing happens. (Need to make a rule that leaders could only request 1 prof at a time.)
+- As a student: when checking inbox user can input any number instead of the one in display.
