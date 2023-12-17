@@ -79,6 +79,7 @@ def get_project(leader_id):
     # print(find_project.table[0])
     return find_project.table[0]
 
+
 class Student:
     def __init__(self, data):
         self.data = data
@@ -101,9 +102,46 @@ class Student:
         my_table.insert_row(data)
 
     def check_inbox(self):
+        project_table = alldata.search('project')
         pending_req_table = alldata.search('member_pending_request')
         find_req = pending_req_table.filter(lambda x: x['to_be_member'] == self.id)
+        print(f"You have {len(find_req.table)} pending request(s).")
+        for data in find_req.table:
+            find_project = project_table.filter(lambda x: x['ProjectID'] == data['ProjectID'])
+            project_data = find_project.table[0]
+            get_leader = get_data(project_data['Lead'])
+            print(f"{get_leader['first']} {get_leader['last']} has invited you to join their project group.")
+            print(f"ProjectID: {project_data['ProjectID']} Title: {project_data['Title']}")
+            print()
 
+        print("Choose which request you want to response to.")
+        while True:
+            project_res = str(input("Enter the ProjectID: "))
+            find_req = pending_req_table.filter(lambda x: x['ProjectID'] == project_res)
+            if find_req != []:
+                break
+            print("Invalid ProjectID. Try again.")
+        find_req = pending_req_table.filter(lambda x: x['ProjectID'] == project_res)
+        while True:
+            response = str(input("What is your response? (Accept/Deny): "))
+            if response.lower() == 'accept':
+                find_req.update_row('to_be_member', self.id, 'Response', 'Accept')
+                date = str(input("Enter the date of response (Date/Month): "))
+                find_req.update_row('to_be_member', self.id, 'Response_date', date)
+                print(f"You have accepted the request to projectID({project_res}).")
+                print("Returning to menu...")
+                break
+            elif response.lower() != 'deny':
+                find_req.update_row('to_be_member', self.id, 'Response', 'Deny')
+                date = str(input("Enter the date of response (Date/Month): "))
+                find_req.update_row('to_be_member', self.id, 'Response_date', date)
+                print(find_req.table)
+                print(f"You have denied the request to projectID({project_res}).")
+                print("Returning to menu...")
+                break
+            elif response.lower() != 'accept' or response.lower() != 'deny':
+                print("Your response is invalid. Tryagain.")
+                continue
 
     def create_project(self):
         project_table = alldata.search('project')
@@ -112,7 +150,7 @@ class Student:
         print("To create a project you will be promoted to be a leader and you must deny all pending invites.")
         choice = input("Accept condition? (Y/N): ")
         if choice.lower() == 'n':
-            print("Project creation progress has been canceled. Returning to menu.")
+            print("Project creation progress has been canceled. Returning to menu...")
             return None
         if choice.lower() == 'y':
             while True:
@@ -183,9 +221,35 @@ class Leader:
             first = data['first']
             last = data['last']
             print(f"You invited {i['to_be_member']} {first} {last}.")
-            print(f"Their response: {i['Response']} date: {i['Response_date']}")
+            print(f"Their response: {i['Response']} , date: {i['Response_date']}")
             print()
-
+        print(f"Choose a student to be member of your project group.")
+        while True:
+            member_id = str(input("Enter their ID: "))
+            find_mem_req = find_project_req.filter(lambda x: x['to_be_member'] == member_id)
+            if find_mem_req != []:
+                break
+            print("Invalid ID. Please try again.")
+        data = get_data(member_id)
+        first = data['first']
+        last = data['last']
+        project_table = alldata.search('project')
+        find_project = project_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        print(f"You're about to add {first} {last} to your group.")
+        confirm = str(input("Do you wish to confirm? (Y/N): "))
+        if confirm.lower() == 'y':
+            if find_project.table[0]['Member1'] == '':
+                find_project.update_row('ProjectID', self.project_id, 'Member1', member_id)
+                change_role(member_id, 'member')
+                print(f"{first} {last} has been added to your group as Member1. Returning to menu...")
+            elif find_project.table[0]['Member2'] == '':
+                find_project.update_row('ProjectID', self.project_id, 'Member2', member_id)
+                change_role(member_id, 'member')
+                print(f"{first} {last} has been added to your group as Member2. Returning to menu...")
+            else:
+                print("Your exceeds the limit of 2 members, you can't add more. Returning to menu...")
+        if confirm.lower() == 'n':
+            print("Member adding process cancelled. Returning to menu...")
 
     def invite_members(self):
         request_data = {}
@@ -206,8 +270,6 @@ class Leader:
                 break
             elif confirm.lower() == 'n':
                 continue
-
-
 
     def request_prof(self):
         pass
@@ -242,7 +304,6 @@ class Leader:
             elif choice == 6:
                 break
             print()
-
 
 
 class Project:
