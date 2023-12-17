@@ -68,6 +68,8 @@ def get_data(ID):
     persons_table = alldata.search('persons')
     user_data = persons_table.filter(lambda x: x['ID'] == ID)
     # print(user_data.table[0])
+    if user_data == []:
+        return None
     return user_data.table[0]
 
 def get_role(ID):
@@ -149,10 +151,14 @@ class Student:
 
     def create_project(self):
         project_table = alldata.search('project')
+        eval_table = alldata.search('evaluation')
         project_id = project_table.aggregate(lambda x: str(x), 'ProjectID')
         # print(project_id)
         print("To create a project you will be promoted to be a leader and you must deny all pending invites.")
-        choice = input("Accept condition? (Y/N): ")
+        while True:
+            choice = str(input("Accept condition? (Y/N): "))
+            if choice.lower() in 'ny':
+                break
         if choice.lower() == 'n':
             print("Project creation progress has been canceled. Returning to menu...")
             return None
@@ -161,15 +167,15 @@ class Student:
                 id_input = str(input("Create your project ID. (ID must be 5 digits): "))
                 if len(id_input) == 5 and id_input not in project_id:
                     break
-                print("Your ID must contains 4 digits and must not been taken. Try again.")
+                print("Your ID must contains 5 digits and must not been taken. Try again.")
                 print()
 
             title = input("Enter your project Title: ")
             self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': None, 'Member2': None, 'Advisor': None, 'Status': 'Pending'})
+            eval_table.insert_row({'ProjectID': id_input, 'Report': None, 'Score': 0, 'Note': None})
             self.update_table('project', self.project_data)
             change_role(self.id, 'lead')
             print("Project has been initialized, returning to menu...")
-            return 1
         exit()
 
     def run(self):
@@ -204,7 +210,12 @@ class Leader:
 
         self.project_data = get_project(self.id)
         self.project_id = self.project_data['ProjectID']
-        # print(self.project_id)
+        self.project_title = self.project_data['Title']
+        self.project_lead = self.project_data['Lead']
+        self.project_mem1 = self.project_data['Member1']
+        self.project_mem2 = self.project_data['Member2']
+        self.project_advisor = self.project_data['Advisor']
+        self.project_status = self.project_data['Status']
         self.pending_request = {}
         self.run()
 
@@ -212,11 +223,23 @@ class Leader:
         return (f"You logged in as {self.first} {self.last}. \n"
                 f"You are a {self.type}.")
 
-    def project_status(self):
-        pass
+    def check_status(self):
+        get_lead_data = get_data(self.project_lead)
+        get_mem1_data = get_data(self.project_mem1)
+        get_mem2_data = get_data(self.project_mem2)
+        get_advisor_data = get_data(self.project_advisor)
+        print("You are now viewing your project status.")
+        print()
+        print(f"ProjectID : {self.project_id}")
+        print(f"Title : {self.project_title}")
+        print(f"Leader : {get_lead_data['first']} {get_lead_data['last']} ({self.project_lead})")
+        print(f"Member1 : {get_mem1_data['first']} {get_mem1_data['last']} ({self.project_mem1})")
+        print(f"Member2 : {get_mem2_data['first']} {get_mem2_data['last']} ({self.project_mem2})")
+        print(f"Advisor : {get_advisor_data['first']} {get_advisor_data['last']} ({self.project_advisor})")
+        print(f"Project Status : {self.project_status}")
 
     def modify_project(self):
-        pass
+        print("What do you want to do?")
 
     def check_inbox(self):
         member_pending_table = alldata.search('member_pending_request')
@@ -356,21 +379,24 @@ class Leader:
                 continue
         exit()
 
+    def submit_project(self):
+        pass
     def run(self):
         print(self)
         print()
         while True:
             print("You have permission to do the following:")
-            print("1. See project status and submit.")
+            print("1. See project status. (You must have 2 members and an advisor.)")
             print("2. See and modify project info.")
             print("3. Check inbox.")
             print("4. Invite members.")
             print("5. Send request to a professor.")
-            print("6. Logout")
+            print("6. Submit your project.")
+            print("7. Logout")
             choice = int(input("Enter your choice: "))
             if choice == 1:
                 print()
-                self.project_status()
+                self.check_status()
             elif choice == 2:
                 print()
                 self.modify_project()
@@ -384,6 +410,9 @@ class Leader:
                 print()
                 self.request_prof()
             elif choice == 6:
+                print()
+                self.submit_project()
+            elif choice == 7:
                 print("You have logged out.")
                 break
             print()
