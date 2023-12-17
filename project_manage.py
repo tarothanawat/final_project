@@ -142,6 +142,7 @@ class Student:
             elif response.lower() != 'accept' or response.lower() != 'deny':
                 print("Your response is invalid. Tryagain.")
                 continue
+        exit()
 
     def create_project(self):
         project_table = alldata.search('project')
@@ -183,6 +184,7 @@ class Student:
                 print()
                 self.create_project()
             elif choice == 3:
+                print("You have logged out.")
                 break
             print()
         #update all tables call function exit()
@@ -227,6 +229,10 @@ class Leader:
         while True:
             member_id = str(input("Enter their ID: "))
             find_mem_req = find_project_req.filter(lambda x: x['to_be_member'] == member_id)
+            if find_mem_req.table[0]['Response'] != 'Accepted':
+                print("Invalid ID(the student didn't accept your invitation or is already in a group). Please try again.")
+                continue
+
             if find_mem_req != []:
                 break
             print("Invalid ID. Please try again.")
@@ -251,9 +257,10 @@ class Leader:
                 find_project_req.update_row('to_be_member', member_id, 'Response', 'JoinedGroup')
                 print(f"{first} {last} has been added to your group as Member2. Returning to menu...")
             else:
-                print("Your exceeds the limit of 2 members, you can't add more. Returning to menu...")
+                print("Your group exceeds the limit of 2 members, you can't add more. Returning to menu...")
         if confirm.lower() == 'n':
             print("Member adding process cancelled. Returning to menu...")
+        exit()
 
     def invite_members(self):
         request_data = {}
@@ -274,6 +281,7 @@ class Leader:
                 break
             elif confirm.lower() == 'n':
                 continue
+            exit()
 
     def request_prof(self):
         pass
@@ -306,6 +314,7 @@ class Leader:
                 print()
                 self.request_prof()
             elif choice == 6:
+                print("You have logged out.")
                 break
             print()
 
@@ -317,7 +326,6 @@ class Project:
 
 # define a function called exit
 def exit():
-    print("You have logged out.")
     tables = {
         'login': 'login.csv',
         'persons': 'persons.csv',
