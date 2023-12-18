@@ -3,6 +3,8 @@
   - Project must have an advisor
   - Project must have 2 members; excluding the leader
 - The project status will be changed to 'WaitingForApproval' in the mean time that advisor has not graded the project.
+- Any faculty can evaluate the project giving "Passed" or "failed".
+- Advisor can only grade the project when the evaluation from other faculty is "Passed".
 - Advisor grades the project. Score of 100
   - if score >= 70: 
     - the project's status gets changed to 'Approved'
