@@ -85,6 +85,12 @@ def get_project(leader_id):
     # print(find_project.table[0])
     return find_project.table[0]
 
+def get_project_projectID(projectID):
+    project_table = alldata.search('project')
+    find_project = project_table.filter(lambda x: x['ProjectID'] == projectID)
+    # print(find_project.table[0])
+    return find_project.table[0]
+
 
 class Student:
     def __init__(self, data):
@@ -135,14 +141,14 @@ class Student:
                 find_req.update_row('to_be_member', self.id, 'Response_date', datetime.date.today())
                 member_req_table = alldata.search('member_pending_request')
                 find_other_req = member_req_table.filter(lambda x: x['Response'] == 'HasNotRespond')
-                find_other_req.update('to_be_member', self.id, 'Response', 'Deny')
+                find_other_req.update_row('to_be_member', self.id, 'Response', 'Deny')
+                find_other_req.update_row('to_be_member', self.id, 'Response_date', datetime.date.today())
                 print(f"You have accepted the request to projectID({project_res}).")
                 print("Returning to menu...")
                 break
-            elif response.lower() != 'deny':
+            elif response.lower() == 'deny':
                 find_req.update_row('to_be_member', self.id, 'Response', 'Deny')
                 find_req.update_row('to_be_member', self.id, 'Response_date', datetime.date.today())
-                print(find_req.table)
                 print(f"You have denied the request to projectID({project_res}).")
                 print("Returning to menu...")
                 break
@@ -175,7 +181,7 @@ class Student:
 
             title = input("Enter your project Title: ")
             self.project_data.update({'ProjectID': id_input, 'Title': title, 'Lead': self.id, 'Member1': 'None', 'Member2': 'None', 'Advisor': 'None', 'Status': 'Pending'})
-            eval_table.insert_row({'ProjectID': id_input, 'Report': 'None', 'Score': 0, 'Note': 'None'})
+            eval_table.insert_row({'ProjectID': id_input, 'Report': 'None', 'Score': 0, 'Note': 'None', 'Eva1': 'None'})
             self.update_table('project', self.project_data)
             member_req_table.update_row('to_be_member', self.id, 'Response', 'Deny')
             member_req_table.update_row('to_be_member', self.id, 'Response_date', datetime.date.today())
@@ -466,7 +472,6 @@ class Leader:
                 print("Choice Invalid. Try again.")
                 print()
 
-
     def run(self):
         print(self)
         print()
@@ -647,8 +652,106 @@ class Faculty:
         return (f"You logged in as {self.first} {self.last}. \n"
                 f"You are a {self.type}.")
 
-    def approve_project(self):
-        pass
+    def eva_project(self):
+        print("You're now evaluating a project.")
+        project_table = alldata.search('project')
+        find_ready = project_table.filter(lambda x: x['Advisor'] != self.id).filter(lambda x: x['Status'] == 'WaitingForApproval')
+        while True:
+            print("Here is a list of projects that are ready for evaluation.")
+            print(find_ready.select(["ProjectID", "Title"]))
+            enter_id = str(input("Enter a ProjectID: "))
+            find_project = project_table.filter(lambda x: x['ProjectID'] == enter_id)
+            print(find_project)
+            if find_project != []:
+                print()
+                break
+            print('Invalid ID.')
+
+        project_data = get_project_projectID(enter_id)
+        project_id = project_data['ProjectID']
+        project_title = project_data['Title']
+        project_lead = project_data['Lead']
+        project_mem1 = project_data['Member1']
+        project_mem2 = project_data['Member2']
+        project_advisor = project_data['Advisor']
+
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == project_id)
+        eval_data = find_eval.table[0]
+        print()
+        print(f"Title: {project_title}")
+        print(f"Project Leader: {project_lead}")
+        print(f"Member 1: {project_mem1}")
+        print(f"Member 2: {project_mem2}")
+        print(f"Advisor: {project_advisor}")
+        print(f"Report: {eval_data['Report']}")
+        print()
+        while True:
+            eval_choose = str(input("What is your evaluation for this project? (fail/pass): "))
+            if eval_choose.lower() == 'fail' or eval_choose.lower() == 'pass':
+                break
+            else:
+                print("Invalid choice.")
+                continue
+        if eval_choose.lower() == 'fail':
+            result = 'Failed'
+        else:
+            result = 'Passed'
+        print(f"Your evaluation for project({project_title}) is {result}.")
+        while True:
+            confirm = str(input("Do you wish to confirm your evaluation? (Y/N): "))
+            if confirm.lower() == 'y':
+                eval_table.update_row('ProjectID', project_id, 'Eva1', result)
+                print(f"Your evaluation has been confirmed. Returning to menu...")
+                break
+            elif confirm.lower() == 'n':
+                print("Project evaluation process has been cancelled. Returning to menu...")
+                break
+            else:
+                print("Invalid input. Try again.")
+
+    def check_any_status(self):
+        print("You're now checking status of a project.")
+        project_table = alldata.search('project')
+        while True:
+            print("Here is a list of projects.")
+            print(project_table.select(["ProjectID", "Title"]))
+            enter_id = str(input("Enter a ProjectID: "))
+            find_project = project_table.filter(lambda x: x['ProjectID'] == enter_id)
+            print(find_project)
+            if find_project != []:
+                print()
+                break
+            print('Invalid ID.')
+
+        project_data = get_project_projectID(enter_id)
+        project_id = project_data['ProjectID']
+        project_title = project_data['Title']
+        project_lead = project_data['Lead']
+        project_mem1 = project_data['Member1']
+        project_mem2 = project_data['Member2']
+        project_advisor = project_data['Advisor']
+        project_status = project_data['Status']
+
+        get_lead_data = get_data(project_lead)
+        get_mem1_data = get_data(project_mem1)
+        get_mem2_data = get_data(project_mem2)
+        get_advisor_data = get_data(project_advisor)
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == project_id)
+        eval_data = find_eval.table[0]
+        print("You are now viewing the project status.")
+        print()
+        print(f"ProjectID : {project_id}")
+        print(f"Title : {project_title}")
+        print(f"Leader : {get_lead_data['first']} {get_lead_data['last']} ({project_lead})")
+        print(f"Member1 : {get_mem1_data['first']} {get_mem1_data['last']} ({project_mem1})")
+        print(f"Member2 : {get_mem2_data['first']} {get_mem2_data['last']} ({project_mem2})")
+        print(f"Advisor : {get_advisor_data['first']} {get_advisor_data['last']} ({project_advisor})")
+        print(f"Project Report: {eval_data['Report']}")
+        print(f"Project Score: {eval_data['Score']}")
+        print(f"Note from advisor: {eval_data['Note']}")
+        print(f"Project Status : {project_status}")
 
     def check_inbox(self):
         project_table = alldata.search('project')
@@ -678,12 +781,12 @@ class Faculty:
                 find_req.update_row('to_be_advisor', self.id, 'Response_date', datetime.date.today())
                 adv_req_table = alldata.search('advisor_pending_request')
                 find_other_req = adv_req_table.filter(lambda x: x['Response'] == 'HasNotRespond')
-                find_other_req.update('to_be_advisor', self.id, 'Response', 'Deny')
+                find_other_req.update_row('to_be_advisor', self.id, 'Response', 'Deny')
                 find_other_req.update_row('to_be_advisor', self.id, 'Response_date', datetime.date.today())
                 print(f"You have accepted the request to projectID({project_res}).")
                 print("Returning to menu...")
                 break
-            elif response.lower() != 'deny':
+            elif response.lower() == 'deny':
                 find_req.update_row('to_be_advisor', self.id, 'Response', 'Deny')
                 find_req.update_row('to_be_advisor', self.id, 'Response_date', datetime.date.today())
                 print(find_req.table)
@@ -701,13 +804,21 @@ class Faculty:
         while True:
             print("You have permission to do the following:")
             print("1. Check inbox.")
-            print("2. Logout.")
+            print("2. Evaluate a project.")
+            print("3. View any project status.")
+            print("4. Logout.")
 
-            choice = int(input("Enter your choice: "))
+            choice = str(input("Enter your choice: "))
             if choice == '1':
                 print()
                 self.check_inbox()
             elif choice == '2':
+                print()
+                self.eva_project()
+            elif choice == '3':
+                print()
+                self.check_any_status()
+            elif choice == '4':
                 print()
                 print("You have logged out.")
                 break
@@ -742,14 +853,116 @@ class Advisor:
         return (f"You logged in as {self.first} {self.last}. \n"
                 f"You are a {self.type}.")
 
+    def eva_project(self):
+        print("You're now evaluating a project.")
+        project_table = alldata.search('project')
+        find_ready = project_table.filter(lambda x: x['Advisor'] != self.id).filter(
+            lambda x: x['Status'] == 'WaitingForApproval')
+        while True:
+            print("Here is a list of projects that are ready for evaluation.")
+            print(find_ready.select(["ProjectID", "Title"]))
+            enter_id = str(input("Enter a ProjectID: "))
+            find_project = project_table.filter(lambda x: x['ProjectID'] == enter_id)
+            print(find_project)
+            if find_project != []:
+                print()
+                break
+            print('Invalid ID.')
+
+        project_data = get_project_projectID(enter_id)
+        project_id = project_data['ProjectID']
+        project_title = project_data['Title']
+        project_lead = project_data['Lead']
+        project_mem1 = project_data['Member1']
+        project_mem2 = project_data['Member2']
+        project_advisor = project_data['Advisor']
+
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == project_id)
+        eval_data = find_eval.table[0]
+        print()
+        print(f"Title: {project_title}")
+        print(f"Project Leader: {project_lead}")
+        print(f"Member 1: {project_mem1}")
+        print(f"Member 2: {project_mem2}")
+        print(f"Advisor: {project_advisor}")
+        print(f"Report: {eval_data['Report']}")
+        print()
+        while True:
+            eval_choose = str(input("What is your evaluation for this project? (fail/pass): "))
+            if eval_choose.lower() == 'fail' or eval_choose.lower() == 'pass':
+                break
+            else:
+                print("Invalid choice.")
+                continue
+        if eval_choose.lower() == 'fail':
+            result = 'Failed'
+        else:
+            result = 'Passed'
+        print(f"Your evaluation for project({project_title}) is {result}.")
+        while True:
+            confirm = str(input("Do you wish to confirm your evaluation? (Y/N): "))
+            if confirm.lower() == 'y':
+                eval_table.update_row('ProjectID', project_id, 'Eva1', result)
+                print(f"Your evaluation has been confirmed. Returning to menu...")
+                break
+            elif confirm.lower() == 'n':
+                print("Project evaluation process has been cancelled. Returning to menu...")
+                break
+            else:
+                print("Invalid input. Try again.")
+
+    def check_any_status(self):
+        print("You're now evaluating a project.")
+        project_table = alldata.search('project')
+        while True:
+            print("Here is a list of projects.")
+            print(project_table.select(["ProjectID", "Title"]))
+            enter_id = str(input("Enter a ProjectID: "))
+            find_project = project_table.filter(lambda x: x['ProjectID'] == enter_id)
+            print(find_project)
+            if find_project != []:
+                print()
+                break
+            print('Invalid ID.')
+
+        project_data = get_project_projectID(enter_id)
+        project_id = project_data['ProjectID']
+        project_title = project_data['Title']
+        project_lead = project_data['Lead']
+        project_mem1 = project_data['Member1']
+        project_mem2 = project_data['Member2']
+        project_advisor = project_data['Advisor']
+        project_status = project_data['Status']
+
+        get_lead_data = get_data(project_lead)
+        get_mem1_data = get_data(project_mem1)
+        get_mem2_data = get_data(project_mem2)
+        get_advisor_data = get_data(project_advisor)
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == project_id)
+        eval_data = find_eval.table[0]
+        print("You are now viewing the project status.")
+        print()
+        print(f"ProjectID : {project_id}")
+        print(f"Title : {project_title}")
+        print(f"Leader : {get_lead_data['first']} {get_lead_data['last']} ({project_lead})")
+        print(f"Member1 : {get_mem1_data['first']} {get_mem1_data['last']} ({project_mem1})")
+        print(f"Member2 : {get_mem2_data['first']} {get_mem2_data['last']} ({project_mem2})")
+        print(f"Advisor : {get_advisor_data['first']} {get_advisor_data['last']} ({project_advisor})")
+        print(f"Project Report: {eval_data['Report']}")
+        print(f"Project Score: {eval_data['Score']}")
+        print(f"Note from advisor: {eval_data['Note']}")
+        print(f"Project Status : {project_status}")
+
     def check_inbox(self):
         project_table = alldata.search('project')
         find_req = project_table.filter(lambda x: x['Status'] == 'WaitingForApproval')
         eval_table = alldata.search('evaluation')
-        find_eval = eval_table.filter(lambda x: x['ProjectID'] == self.project_id)
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == self.project_id).filter(lambda x: x['Eva1'] == 'Passed')
         eval_data = find_eval.table[0]
-        print(f"You have {len(find_req.table)} pending request for approval.")
-        if len(find_req.table) == 0:
+        print(f"You have {len(find_eval.table)} pending request for approval.")
+        if len(find_eval.table) == 0:
             print("Returning to menu...")
             return None
         print()
@@ -812,7 +1025,9 @@ class Advisor:
             print("You have permission to do the following:")
             print("1. Check inbox (for project approval).")
             print("2. See project status.")
-            print("3. Logout.")
+            print("3. Check any project status.")
+            print("4. Evaluate a project (that is not advised by you): ")
+            print("5. Logout.")
             choice = str(input("Enter your choice: "))
             if choice == '1':
                 print()
@@ -821,6 +1036,12 @@ class Advisor:
                 print()
                 self.check_status()
             elif choice == '3':
+                print()
+                self.check_any_status()
+            elif choice == '4':
+                print()
+                self.eva_project()
+            elif choice == '5':
                 print()
                 print("You have logged out.")
                 break
@@ -845,29 +1066,28 @@ class Admin:
                 f"You are a {self.type}.")
 
     def remove_person(self):
-        print("You're now removing a person from a project.")
-        project_table = alldata.search('project')
-        print("List of projects.")
-        print(project_table.table)
-        project_allID = project_table.select('ProjectID')
-        while True:
-            project_choose = str(input("Please enter the projectID you want to remove a person from: "))
-            project_exists = False
-            for project in project_allID:
-                if project['ProjectID'] == project_choose:
-                    project_exists = True
-                    break
-            if project_exists:
-                break
-            else:
-                print(f"Invalid ProjectID.")
-        project_find = project_table.filter(lambda x: x['ProjectID'] == project_choose)
-        while True:
-            person_to_remove = str(input("Which person do you want to remove from this project (Leader, Member1, Member2, Advisor): "))
-
-
-
-
+        pass
+    #     print("You're now removing a person from a project.")
+    #     project_table = alldata.search('project')
+    #     print("List of projects.")
+    #     print(project_table.table)
+    #     project_allID = project_table.select('ProjectID')
+    #     while True:
+    #         project_choose = str(input("Please enter the projectID you want to remove a person from: "))
+    #         project_exists = False
+    #         for project in project_allID:
+    #             if project['ProjectID'] == project_choose:
+    #                 project_exists = True
+    #                 break
+    #         if project_exists:
+    #             break
+    #         else:
+    #             print(f"Invalid ProjectID.")
+    #     project_find = project_table.filter(lambda x: x['ProjectID'] == project_choose)
+    #     while True:
+    #         person_to_remove = str(input("Which person do you want to remove from this project (Leader, Member1, Member2, Advisor): "))
+    #         if person_to_remove.lower() == 'lead':
+    #
 
 
     def modify_project(self):
@@ -914,7 +1134,7 @@ def exit():
         'project': ['ProjectID', "Title", "Lead", 'Member1', 'Member2', 'Advisor', 'Status'],
         'advisor_pending_request': ['ProjectID', 'to_be_advisor', 'Response', 'Response_date'],
         'member_pending_request': ['ProjectID', 'to_be_member', 'Response', 'Response_date'],
-        'evaluation': ['ProjectID', 'Report', 'Score', 'Note']
+        'evaluation': ['ProjectID', 'Report', 'Score', 'Note', 'Eva1']
     }
 
     for table_name, file_name in tables.items():
