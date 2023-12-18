@@ -1066,28 +1066,209 @@ class Admin:
                 f"You are a {self.type}.")
 
     def remove_person(self):
-        pass
-    #     print("You're now removing a person from a project.")
-    #     project_table = alldata.search('project')
-    #     print("List of projects.")
-    #     print(project_table.table)
-    #     project_allID = project_table.select('ProjectID')
-    #     while True:
-    #         project_choose = str(input("Please enter the projectID you want to remove a person from: "))
-    #         project_exists = False
-    #         for project in project_allID:
-    #             if project['ProjectID'] == project_choose:
-    #                 project_exists = True
-    #                 break
-    #         if project_exists:
-    #             break
-    #         else:
-    #             print(f"Invalid ProjectID.")
-    #     project_find = project_table.filter(lambda x: x['ProjectID'] == project_choose)
-    #     while True:
-    #         person_to_remove = str(input("Which person do you want to remove from this project (Leader, Member1, Member2, Advisor): "))
-    #         if person_to_remove.lower() == 'lead':
-    #
+        print("You're now removing a person from a project.")
+        project_table = alldata.search('project')
+        print("List of projects.")
+        print(project_table.table)
+        project_allID = project_table.select('ProjectID')
+        while True:
+            project_choose = str(input("Please enter the projectID you want to remove a person from: "))
+            project_exists = False
+            for project in project_allID:
+                if project['ProjectID'] == project_choose:
+                    project_exists = True
+                    break
+            if project_exists:
+                break
+            else:
+                print(f"Invalid ProjectID.")
+        project_find = project_table.filter(lambda x: x['ProjectID'] == project_choose)
+        project_data = get_project_projectID(project_choose)
+        project_id = project_data['ProjectID']
+        project_title = project_data['Title']
+        project_lead = project_data['Lead']
+        project_mem1 = project_data['Member1']
+        project_mem2 = project_data['Member2']
+        project_advisor = project_data['Advisor']
+        project_status = project_data['Status']
+
+        get_lead_data = get_data(project_lead)
+        get_mem1_data = get_data(project_mem1)
+        get_mem2_data = get_data(project_mem2)
+        get_advisor_data = get_data(project_advisor)
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == project_id)
+        eval_data = find_eval.table[0]
+        while True:
+            person_to_remove = str(input("Which person do you want to remove from this project (Leader, Member1, Member2, Advisor): "))
+            if person_to_remove.lower() == 'leader':
+                print()
+                print("You're removing the project Leader the project will be disbanded. Are you sure?")
+                while True:
+                    confirm = str(input("Do you wish to confirm your action? (Y/N): "))
+                    if confirm.lower() == 'y':
+                        self.nuke_project(project_id)
+                        print()
+                        print(f"You nuked project({project_choose}) all associate roles are reverted and data are all gone.")
+                        print(f"Your action has consequences. Returning to menu...")
+                        break
+                    elif confirm.lower() == 'n':
+                        print("Your action has been cancelled. Returning to menu...")
+                        break
+                    else:
+                        print("Invalid input. Try again.")
+
+            elif person_to_remove.lower() == 'member1':
+                print()
+                print(f"You're removing {get_mem1_data['first']} {get_mem1_data['last']} from the project. Are you sure?")
+                while True:
+                    confirm = str(input("Do you wish to confirm your action? (Y/N): "))
+                    if confirm.lower() == 'y':
+                        self.remove_a_member(project_choose, get_mem1_data['ID'], 'student')
+                        print()
+                        print(
+                            f"You removed {get_mem1_data['first']} {get_mem1_data['last']} from project({project_choose}).")
+                        print(f"Your action has consequences. Returning to menu...")
+                        break
+                    elif confirm.lower() == 'n':
+                        print("Your action has been cancelled. Returning to menu...")
+                        break
+                    else:
+                        print("Invalid input. Try again.")
+
+            elif person_to_remove.lower() == 'member2':
+                print()
+                print(f"You're removing {get_mem2_data['first']} {get_mem2_data['last']} from the project. Are you sure")
+                while True:
+                    confirm = str(input("Do you wish to confirm your action? (Y/N): "))
+                    if confirm.lower() == 'y':
+                        self.remove_a_member(project_choose, get_mem2_data['ID'], 'student')
+                        print()
+                        print(
+                            f"You removed {get_mem2_data['first']} {get_mem2_data['last']} from project({project_choose}).")
+                        print(f"Your action has consequences. Returning to menu...")
+                        break
+                    elif confirm.lower() == 'n':
+                        print("Your action has been cancelled. Returning to menu...")
+                        break
+                    else:
+                        print("Invalid input. Try again.")
+
+            elif person_to_remove.lower() == 'advisor':
+                print()
+                print(f"You're removing {get_advisor_data['first']} {get_advisor_data['last']} from the project. Are you sure? ")
+                while True:
+                    confirm = str(input("Do you wish to confirm your action? (Y/N): "))
+                    if confirm.lower() == 'y':
+                        self.remove_a_member(project_choose, get_advisor_data['ID'], 'faculty')
+                        print()
+                        print(
+                            f"You removed {get_advisor_data['first']} {get_advisor_data['last']} from project({project_choose}).")
+                        print(f"Your action has consequences. Returning to menu...")
+                        break
+                    elif confirm.lower() == 'n':
+                        print("Your action has been cancelled. Returning to menu...")
+                        break
+                    else:
+                        print("Invalid input. Try again.")
+            else:
+                print("Invalid Input.")
+            break
+
+    def remove_a_member(self, projectID ,memberID, newrole):
+
+        project_data = get_project_projectID(projectID)
+        project_title = project_data['Title']
+        project_lead = project_data['Lead']
+        project_mem1 = project_data['Member1']
+        project_mem2 = project_data['Member2']
+        project_advisor = project_data['Advisor']
+        project_status = project_data['Status']
+
+        get_mem1_data = get_data(project_mem1)
+        get_mem2_data = get_data(project_mem2)
+        get_advisor_data = get_data(project_advisor)
+
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == projectID)
+        eval_data = find_eval.table[0]
+
+        project_table = alldata.search('project')
+        project_find = project_table.filter(lambda x: x['ProjectID'] == projectID)
+        get_target_data = get_data(memberID)
+
+        if get_target_data['type'] == 'member':
+            member_pending = alldata.search('member_pending_request')
+            member_pending_find = member_pending.filter(lambda x: x['ProjectID'] == projectID)
+            if memberID == get_mem1_data['ID']:
+                project_find.update_row("ProjectID", projectID, "Member1", 'None')
+                member_pending_find.update_row('to_be_member', memberID, 'Response', 'None')
+                member_pending_find.update_row('to_be_member', memberID, 'Response_date', 'None')
+                member_pending_find.update_row('to_be_member', memberID, 'ProjectID', 'None')
+                member_pending_find.update_row('to_be_member', memberID, 'to_be_member', 'None')
+            elif memberID == get_mem2_data['ID']:
+                project_find.update_row("ProjectID", projectID, "Member2", 'None')
+                member_pending_find.update_row('to_be_member', memberID, 'Response', 'None')
+                member_pending_find.update_row('to_be_member', memberID, 'Response_date', 'None')
+                member_pending_find.update_row('to_be_member', memberID, 'ProjectID', 'None')
+                member_pending_find.update_row('to_be_member', memberID, 'to_be_member', 'None')
+
+        if get_target_data['type'] == 'advisor':
+            advisor_pending = alldata.search('advisor_pending_request')
+            advisor_find = advisor_pending.filter(lambda x: x['ProjectID'] == projectID)
+            advisor_find.update_row('ProjectID', projectID, 'to_be_advisor', 'None')
+            advisor_find.update_row('ProjectID', projectID, 'Response', 'None')
+            advisor_find.update_row('ProjectID', projectID, 'Response_date', 'None')
+            advisor_find.update_row('ProjectID', projectID, 'ProjectID', 'None')
+            project_find.update_row("ProjectID", projectID, "Advisor", 'None')
+        change_role(memberID, newrole)
+
+    def nuke_project(self, projectID):
+        project_data = get_project_projectID(projectID)
+        project_id = project_data['ProjectID']
+        project_lead = project_data['Lead']
+        project_mem1 = project_data['Member1']
+        project_mem2 = project_data['Member2']
+        project_advisor = project_data['Advisor']
+
+        eval_table = alldata.search('evaluation')
+        find_eval = eval_table.filter(lambda x: x['ProjectID'] == project_id)
+
+
+        member_pending = alldata.search('member_pending_request')
+        member_pending_find = member_pending.filter(lambda x: x['ProjectID'] == projectID)
+        member_pending_find.update_row('ProjectID', projectID, 'to_be_member', 'Nuked')
+        member_pending_find.update_row('ProjectID', projectID, 'Response', 'Nuked')
+        member_pending_find.update_row('ProjectID', projectID, 'Response_date', 'Nuked')
+        member_pending_find.update_row('ProjectID', projectID, 'ProjectID', 'Nuked')
+
+        advisor_pending = alldata.search('advisor_pending_request')
+        advisor_find = advisor_pending.filter(lambda x: x['ProjectID'] == projectID)
+        advisor_find.update_row('ProjectID', projectID, 'to_be_advisor', 'Nuked')
+        advisor_find.update_row('ProjectID', projectID, 'Response', 'Nuked')
+        advisor_find.update_row('ProjectID', projectID, 'Response_date', 'Nuked')
+        advisor_find.update_row('ProjectID', projectID, 'ProjectID', 'Nuked')
+
+        find_eval.update_row("ProjectID", projectID, "Report", "Project Nuked")
+        find_eval.update_row("ProjectID", projectID, "Score", "Project Nuked")
+        find_eval.update_row("ProjectID", projectID, "Eva1", "Project Nuked")
+        find_eval.update_row("ProjectID", projectID, "Note", "Project Nuked")
+        find_eval.update_row("ProjectID", projectID, "ProjectID", "Project Nuked")
+
+        project_table = alldata.search('project')
+        project_find = project_table.filter(lambda x: x['ProjectID'] == projectID)
+
+        change_role(project_lead, 'student')
+        change_role(project_mem1, 'student')
+        change_role(project_mem2, 'student')
+        change_role(project_advisor, 'faculty')
+        project_find.update_row("ProjectID", projectID, "Lead", "Nuked")
+        project_find.update_row("ProjectID", projectID, "Member1", "Nuked")
+        project_find.update_row("ProjectID", projectID, "Member2", "Nuked")
+        project_find.update_row("ProjectID", projectID, "Advisor", "Nuked")
+        project_find.update_row("ProjectID", projectID, "Title", "Nuked")
+        project_find.update_row("ProjectID", projectID, "Status", "Nuked")
+        project_find.update_row("ProjectID", projectID, "ProjectID", "Nuked")
 
 
     def modify_project(self):
