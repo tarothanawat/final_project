@@ -5,9 +5,8 @@ import csv
 import datetime
 # define a funcion called initializing
 
+
 def initializing():
-
-
 # here are things to do in this function:
     # create an object to read all csv files that will serve as a persistent state for this program
 
@@ -58,12 +57,14 @@ def login():
     # print(find_person.table)
     return [find_person.table[0]['ID'], find_person.table[0]['role']]
 
+
 def change_role(ID, role):
     persons_table = alldata.search('persons')
     persons_table.update_row('ID', ID, 'type', role)
 
     login_table = alldata.search('login')
     login_table.update_row('ID', ID, 'role', role)
+
 
 def get_data(ID):
     persons_table = alldata.search('persons')
@@ -79,11 +80,13 @@ def get_role(ID):
     print(type)
     return type
 
+
 def get_project(leader_id):
     project_table = alldata.search('project')
     find_project = project_table.filter(lambda x: x['Lead'] == leader_id)
     # print(find_project.table[0])
     return find_project.table[0]
+
 
 def get_project_projectID(projectID):
     project_table = alldata.search('project')
