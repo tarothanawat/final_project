@@ -32,3 +32,15 @@
 - Modifying a project means actions such as....
   - editing project title
   - editing the Report in evaluation.csv
+
+{Admin Class}
+- Admin class can do 2 main actions
+  - 1. Remove a person from a project.
+     - if that person is a {Leader} The project will be disbanded and all data that ties to the project will be "nuked". The Leader's role will be reverted to student.
+     - if that person is a {Member} They will be removed from the project all information that ties to them being in the project will be "nuked". Their role will be reverted to student.
+     - if that person is an {Advisor} They will be removed from the project all information that ties to them being in the project will be "nuked". Their role will be reverted to faculty.
+  - 2. Change login data.
+     - The Admin  needs to enter thr first name and last name of the target.
+     - Then they choose which to change username or password.
+     - Then they enter the new data.
+     - The login database gets updated.

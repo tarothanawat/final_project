@@ -1271,8 +1271,90 @@ class Admin:
         project_find.update_row("ProjectID", projectID, "ProjectID", "Nuked")
 
 
-    def modify_project(self):
-        pass
+    def change_login_data(self):
+        print("You're now changing login data.")
+        persons_table = alldata.search('persons')
+        while True:
+            first = str(input("Enter the first name of your target: "))
+            last = str(input("Enter the last name of your target: "))
+            find_person = persons_table.filter(lambda x: x['first'] == first).filter(lambda x: x['last'] ==last)
+            if find_person != []:
+                break
+            print("Error: person not found. Try again.")
+            print()
+        person_data = find_person.table[0]
+        person_id = person_data['ID']
+        person_first = person_data['first']
+        person_last = person_data['last']
+        person_role = person_data['type']
+
+        login_table = alldata.search('login')
+        login_find = login_table.filter(lambda x: x['ID'] == person_id)
+        print()
+        while True:
+            print(f"Which data of {person_first} {person_last} do you want to change?:")
+            print(f"Note: If you want to revert their roles you can do so by removing them from a project.")
+            print("1. Change their username.")
+            print("2. Change their password.")
+            print("3. Return to main menu.")
+            choice = str(input("Enter your choice: "))
+            if choice == '1':
+                while True:
+                    print()
+                    new_user_name = str(input("Enter their new user name: "))
+                    if new_user_name != '' and not new_user_name.isspace() and len(new_user_name) <= 16:
+                        break
+                    print("Username must not be an empty string and not longer than 16 characters!")
+                while True:
+                    print()
+                    print(f"You're about to change {person_first} {person_last}'s username to {new_user_name}")
+                    while True:
+                        confirm = str(input("Do you wish to confirm your action? (Y/N): "))
+                        if confirm.lower() == 'y':
+                            login_table.update_row("ID", person_id, "username", new_user_name)
+                            print(f"Successfully change their username to {new_user_name}")
+                            print(f"Your action has consequences. Returning to menu...")
+                            break
+                        elif confirm.lower() == 'n':
+                            print("Your action has been cancelled. Returning to menu...")
+                            break
+                        else:
+                            print("Invalid input. Try again.")
+                    break
+
+            elif choice == '2':
+                print()
+                while True:
+                    print()
+                    new_pass = str(input("Enter their new password: "))
+                    if new_pass != '' and not new_pass.isspace() and len(new_pass) == 4:
+                        break
+                    print("Password must not be an empty string and must be 4 digits!")
+                while True:
+                    print()
+                    print(f"You're about to change {person_first} {person_last}'s password to {new_pass}")
+                    while True:
+                        confirm = str(input("Do you wish to confirm your action? (Y/N): "))
+                        if confirm.lower() == 'y':
+                            login_table.update_row("ID", person_id, "password", new_pass)
+                            print(f"Successfully change their password to {new_pass}")
+                            print(f"Your action has consequences. Returning to menu...")
+                            break
+                        elif confirm.lower() == 'n':
+                            print("Your action has been cancelled. Returning to menu...")
+                            break
+                        else:
+                            print("Invalid input. Try again.")
+                    break
+
+            elif choice == '3':
+                print()
+                print("Returning to main menu....")
+                break
+            else:
+                print("Choice Invalid. Try again.")
+                print()
+            print()
 
     def run(self):
         print(self)
@@ -1280,7 +1362,7 @@ class Admin:
         while True:
             print("You have permission to do the following:")
             print("1. Remove a person from a project.")
-            print("2. Modify project.")
+            print("2. Change login data.")
             print("3. Logout.")
             choice = str(input("Enter your choice: "))
             if choice == '1':
@@ -1288,7 +1370,7 @@ class Admin:
                 self.remove_person()
             elif choice == '2':
                 print()
-                self.modify_project()
+                self.change_login_data()
             elif choice == '3':
                 print()
                 print("You have logged out.")
@@ -1297,6 +1379,7 @@ class Admin:
                 print("Choice Invalid. Try again.")
                 print()
             print()
+
 
 # define a function called exit
 def exit():

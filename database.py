@@ -107,41 +107,6 @@ class Table:
             if i[primary_attribute] == primary_attribute_value:
                 i[update_attribute] = update_value
 
-    # def delete_row(self, primary_attribute, primary_attribute_value, del_attribute, del_value):
-    #     for i in self.table:
-    #         if i[primary_attribute] == primary_attribute_value and i[del_attribute] == del_value:
-    #             print(self.table[i])
-    #             # self.table.remove(i)
-
-    def pivot_table(self, keys_to_pivot_list, keys_to_aggreagte_list, aggregate_func_list):
-
-        unique_values_list = []
-        for key_item in keys_to_pivot_list:
-            temp = []
-            for dict in self.table:
-                if dict[key_item] not in temp:
-                    temp.append(dict[key_item])
-            unique_values_list.append(temp)
-
-        # combination of unique value lists
-        import combination_gen
-        comb_list = combination_gen.gen_comb_list(unique_values_list)
-
-        pivot_table = []
-        # filter each combination
-        for item in comb_list:
-            temp_filter_table = self
-            for i in range(len(item)):
-                temp_filter_table = temp_filter_table.filter(lambda x: x[keys_to_pivot_list[i]] == item[i])
-
-            # aggregate over the filtered table
-            aggregate_val_list = []
-            for i in range(len(keys_to_aggreagte_list)):
-                aggregate_val = temp_filter_table.aggregate(aggregate_func_list[i], keys_to_aggreagte_list[i])
-                aggregate_val_list.append(aggregate_val)
-            pivot_table.append([item, aggregate_val_list])
-        return pivot_table
-
     def __str__(self):
         return self.table_name + ':' + str(self.table)
 # modify the code in the Table class so that it supports the insert operation where an entry can be added to a list of dictionary
