@@ -24,6 +24,7 @@
 - Most known bugs are fixed. But there are probably more not found by me.
 - There are  loop-holes and test cases that is program didn't cover (I think).
 - There are alot of duplicated codes that could've been made into a global function ,but I just forgets it every time I need to use it.
+- Nothing is saved until logout (I don't think it's a bug, just kind of weird.)
 
 {Things I learned}
 - To plan all things before I start coding. Because there are some problems that could easily be fixed with proper planning beforehand.
